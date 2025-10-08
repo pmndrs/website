@@ -21,7 +21,7 @@ const ContentSecurityPolicy = `
   img-src * blob: data:;
   media-src *.s3.amazonaws.com;
   font-src 'self';
-  frame-src giscus.app
+  frame-src giscus.app https://www.youtube.com
 `
 
 const securityHeaders = [
