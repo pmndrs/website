@@ -104,5 +104,15 @@ module.exports = () => {
 
       return config
     },
+    async redirects() {
+      return [
+        // Basic redirect
+        {
+          source: '/discord',
+          destination: 'https://discord.com/invite/poimandres',
+          permanent: true,
+        },
+      ]
+    }
   })
 }
