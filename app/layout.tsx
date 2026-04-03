@@ -8,11 +8,9 @@ import SectionContainer from '@/components/SectionContainer'
 import siteMetadata from '@/data/siteMetadata'
 import { Metadata } from 'next'
 import { Inter } from 'next/font/google'
-import { Analytics, AnalyticsConfig } from 'pliny/analytics'
 import { SearchConfig, SearchProvider } from 'pliny/search'
 import { ThemeProviders } from './theme-providers'
-import PmndrsCanvas from './Canvas'
-import { Spinner } from '@/components/Spinner'
+import ClientSceneShell from './ClientSceneShell'
 
 const inter = Inter({
   subsets: ['latin'],
@@ -99,8 +97,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="bg-white pl-[calc(100vw-100%)] text-black antialiased dark:bg-[rgb(13,13,13)] dark:text-white">
         <ThemeProviders>
           <div className="relative z-[0]">
-            <PmndrsCanvas />
-            <Spinner />
+            <ClientSceneShell />
             <SectionContainer>
               <div className="flex h-screen flex-col justify-between font-sans">
                 <SearchProvider searchConfig={siteMetadata.search as SearchConfig}>

@@ -1,8 +1,10 @@
 'use client'
+import * as THREE from 'three'
 import { BakeShadows, MeshReflectorMaterial, useGLTF } from '@react-three/drei'
-import { Canvas, useFrame } from '@react-three/fiber'
+import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { Bloom, DepthOfField, EffectComposer } from '@react-three/postprocessing'
 import { easing } from 'maath'
+import { useEffect } from 'react'
 import { suspend } from 'suspend-react'
 import { Computers, Instances } from './Computers'
 
@@ -20,7 +22,7 @@ export default function App() {
       style={{ position: 'fixed', animation: 'fade-in 5s ease 1s forwards' }}
     >
       {/* Lights */}
-      <color attach="background" args={['black']} />
+      <SceneBackground color="black" />
       <hemisphereLight intensity={0.15} groundColor="black" />
       <spotLight
         decay={0}
@@ -69,6 +71,16 @@ export default function App() {
       <BakeShadows />
     </Canvas>
   )
+}
+
+function SceneBackground({ color }: { color: string }) {
+  const scene = useThree((state) => state.scene)
+
+  useEffect(() => {
+    scene.background = new THREE.Color(color)
+  }, [color, scene])
+
+  return null
 }
 
 function Bun(props) {

@@ -3,16 +3,17 @@
 import headerNavLinks from '@/data/headerNavLinks'
 import Logo from '@/data/logo.svg'
 import siteMetadata from '@/data/siteMetadata'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import Link from './Link'
 import MobileNav from './MobileNav'
 import SearchButton from './SearchButton'
 import ThemeSwitch from './ThemeSwitch'
 import SocialIcon from './social-icons'
-import { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { useSpring, a } from '@react-spring/web'
 
 const PmndrsHeader = () => {
+  const router = useRouter()
   const linksRef = useRef<HTMLDivElement>(null!)
   const homeRef = useRef<HTMLDivElement>(null!)
   const sectionRef = useRef<HTMLElement | null>(null)
@@ -20,6 +21,9 @@ const PmndrsHeader = () => {
   const pathname = usePathname()
   const isHome = pathname === '/'
   const prevIsHome = useRef(isHome)
+  const prefetchHome = useCallback(() => {
+    router.prefetch('/')
+  }, [router])
 
   const [winWidth, setWinWidth] = useState(() =>
     typeof window === 'undefined' ? 0 : window.innerWidth
@@ -81,14 +85,20 @@ const PmndrsHeader = () => {
 
   return (
     <>
-      <header className="absolute left-[calc((100%-100vw)/2)] top-0 z-[1] flex h-[130px] w-[100%] items-center py-10">
+      <header className="absolute top-0 left-[calc((100%-100vw)/2)] z-[1] flex h-[130px] w-[100%] items-center py-10">
         <a.div
           ref={homeRef}
           className="absolute"
           style={{ x: props.homeX, opacity: props.homeOpacity }}
         >
           {!isHome && (
-            <Link href="/" aria-label={siteMetadata.headerTitle}>
+            <Link
+              href="/"
+              aria-label={siteMetadata.headerTitle}
+              onMouseEnter={prefetchHome}
+              onFocus={prefetchHome}
+              onTouchStart={prefetchHome}
+            >
               <div className="flex items-center justify-between">
                 <Logo className="size-10 dark:invert" />
               </div>
@@ -107,8 +117,7 @@ const PmndrsHeader = () => {
                 <Link
                   key={link.title}
                   href={link.href}
-                  className="hidden font-medium text-gray-900 hover:text-primary-500 dark:text-gray-100 dark:hover:opacity-60
-              sm:block"
+                  className="hover:text-primary-500 hidden font-medium text-gray-900 sm:block dark:text-gray-100 dark:hover:opacity-60"
                 >
                   {link.title}
                 </Link>
