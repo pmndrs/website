@@ -11,7 +11,7 @@ import { Inter } from 'next/font/google'
 import { Analytics, AnalyticsConfig } from 'pliny/analytics'
 import { SearchConfig, SearchProvider } from 'pliny/search'
 import { ThemeProviders } from './theme-providers'
-import dynamic from 'next/dynamic'
+import PmndrsCanvas from './Canvas'
 import { Spinner } from '@/components/Spinner'
 
 const inter = Inter({
@@ -60,10 +60,6 @@ export const metadata: Metadata = {
   },
 }
 
-const PmndrsCanvas = dynamic(() => import('./Canvas'), {
-  ssr: false,
-})
-
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   const basePath = process.env.BASE_PATH || ''
 
@@ -102,7 +98,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <link rel="alternate" type="application/rss+xml" href={`${basePath}/feed.xml`} />
       <body className="bg-white pl-[calc(100vw-100%)] text-black antialiased dark:bg-[rgb(13,13,13)] dark:text-white">
         <ThemeProviders>
-          <Analytics analyticsConfig={siteMetadata.analytics as AnalyticsConfig} />
           <div className="relative z-[0]">
             <PmndrsCanvas />
             <Spinner />
