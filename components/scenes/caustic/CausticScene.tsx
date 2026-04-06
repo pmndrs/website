@@ -13,7 +13,7 @@ import {
   useGLTF,
 } from '@react-three/drei'
 import { ThreeElements, useFrame, useThree } from '@react-three/fiber'
-import { useCanvasApi } from 'app/Canvas'
+import { useCanvasApi } from 'app/canvas-state'
 import { easing } from 'maath'
 import { useTheme } from 'next-themes'
 import { memo, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
@@ -31,6 +31,8 @@ const innerMaterial = new THREE.MeshStandardMaterial({
   envMapIntensity: 2,
 })
 
+const ENV_LIGHTFORMER_X = [2, -2, 2, -4, 2, -5, 2, -9]
+
 export default function CausticScene({ perfSucks = false }) {
   const { resolvedTheme } = useTheme()
 
@@ -38,31 +40,37 @@ export default function CausticScene({ perfSucks = false }) {
     <AsyncPreload
       mountOnLoad={
         <>
-          <Shadows />
+          <Shadows perfSucks={perfSucks} />
           <IsLoadedWhenMounted />
         </>
       }
     >
-      {resolvedTheme === 'dark' ? (
-        <color attach="background" args={['#0d0d0d']} />
-      ) : (
-        <color attach="background" args={['#f0f0f0']} />
-      )}
+      <SceneBackground color={resolvedTheme === 'dark' ? '#0d0d0d' : '#f0f0f0'} />
 
       <group position={[0, -0.5, 0]} rotation={[0, -0.75, 0]}>
         <Scene theme={resolvedTheme} />
       </group>
       <Env perfSucks={perfSucks} theme={resolvedTheme ?? 'light'} />
-      {resolvedTheme === 'dark' && <Stars />}
+      {resolvedTheme === 'dark' && <SceneStars perfSucks={perfSucks} />}
     </AsyncPreload>
   )
 }
 
-const Shadows = memo(function Shadows() {
+function SceneBackground({ color }: { color: string }) {
+  const scene = useThree((state) => state.scene)
+
+  useEffect(() => {
+    scene.background = new THREE.Color(color)
+  }, [color, scene])
+
+  return null
+}
+
+const Shadows = memo(function Shadows({ perfSucks }: { perfSucks: boolean }) {
   return (
     <group position={[0, -0.5, 0]} rotation={[0, -0.75, 0]}>
       <AccumulativeShadows
-        frames={100}
+        frames={perfSucks ? 12 : 32}
         alphaTest={0.75}
         opacity={0.8}
         color={'red'}
@@ -70,7 +78,7 @@ const Shadows = memo(function Shadows() {
         position={[0, -0.005, 0]}
       >
         <RandomizedLight
-          amount={8}
+          amount={perfSucks ? 4 : 6}
           radius={6}
           ambient={0.5}
           intensity={Math.PI}
@@ -80,6 +88,20 @@ const Shadows = memo(function Shadows() {
       </AccumulativeShadows>
       <IsLoadedWhenMounted />
     </group>
+  )
+})
+
+const SceneStars = memo(function SceneStars({ perfSucks }: { perfSucks: boolean }) {
+  return (
+    <Stars
+      radius={60}
+      depth={35}
+      count={perfSucks ? 600 : 1200}
+      factor={3}
+      saturation={0}
+      fade
+      speed={0.35}
+    />
   )
 })
 
@@ -187,7 +209,7 @@ function Env({ perfSucks, theme }: { perfSucks: boolean; theme: string }) {
 
   useFrame((state, delta) => {
     // Animate the environment as well as the camera
-    if (!perfSucks) {
+    if (!perfSucks && ref.current) {
       easing.damp3(
         ref.current.rotation as unknown as THREE.Vector3,
         [Math.PI / 2, 0, state.clock.elapsedTime / 5 + state.pointer.x],
@@ -215,7 +237,7 @@ function Env({ perfSucks, theme }: { perfSucks: boolean; theme: string }) {
     <Environment
       frames={perfSucks ? 1 : Infinity}
       files="/static/hdri/city.jpg"
-      resolution={256}
+      resolution={perfSucks ? 128 : 192}
       background
       backgroundBlurriness={0.8}
     >
@@ -242,7 +264,7 @@ function Env({ perfSucks, theme }: { perfSucks: boolean; theme: string }) {
       />
 
       <group rotation={[Math.PI / 2, 1, 0]}>
-        {[2, -2, 2, -4, 2, -5, 2, -9].map((x, i) => (
+        {ENV_LIGHTFORMER_X.map((x, i) => (
           <Lightformer
             key={i}
             intensity={1}
@@ -315,23 +337,36 @@ function AsyncPreload({
 
   useLayoutEffect(() => {
     if (isLoadedRef.current) return
+    if (!group.current) return
+
+    let cancelled = false
 
     group.current.visible = false
 
-    scene.traverse((child) => {
-      // Init all textures
-      if (child instanceof THREE.Mesh) {
-        if (child.material.map) gl.initTexture(child.material.map)
-        if (child.material.normalMap) gl.initTexture(child.material.normalMap)
-        if (child.material.roughnessMap) gl.initTexture(child.material.roughnessMap)
-        if (child.material.metalnessMap) gl.initTexture(child.material.metalnessMap)
+    if (process.env.NODE_ENV !== 'production') {
+      group.current.visible = true
+      setIsLoaded(true)
+      return () => {
+        cancelled = true
       }
+    }
+
+    group.current.traverse((child) => {
+      if (!(child instanceof THREE.Mesh)) return
+
+      const materials = Array.isArray(child.material) ? child.material : [child.material]
+      materials.forEach((material) => initMaterialTextures(gl, material))
     })
 
     gl.compileAsync(group.current, camera, scene).then(() => {
+      if (cancelled || !group.current) return
       group.current.visible = true
       setIsLoaded(true)
     })
+
+    return () => {
+      cancelled = true
+    }
   }, [gl, scene, camera, children])
 
   return (
@@ -340,6 +375,20 @@ function AsyncPreload({
       {isLoaded && mountOnLoad}
     </group>
   )
+}
+
+function initMaterialTextures(gl: THREE.WebGLRenderer, material: THREE.Material) {
+  const materialWithMaps = material as THREE.Material & {
+    map?: THREE.Texture | null
+    normalMap?: THREE.Texture | null
+    roughnessMap?: THREE.Texture | null
+    metalnessMap?: THREE.Texture | null
+  }
+
+  if (materialWithMaps.map) gl.initTexture(materialWithMaps.map)
+  if (materialWithMaps.normalMap) gl.initTexture(materialWithMaps.normalMap)
+  if (materialWithMaps.roughnessMap) gl.initTexture(materialWithMaps.roughnessMap)
+  if (materialWithMaps.metalnessMap) gl.initTexture(materialWithMaps.metalnessMap)
 }
 
 function IsLoadedWhenMounted() {

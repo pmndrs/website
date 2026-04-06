@@ -3,16 +3,17 @@
 import headerNavLinks from '@/data/headerNavLinks'
 import Logo from '@/data/logo.svg'
 import siteMetadata from '@/data/siteMetadata'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import Link from './Link'
 import MobileNav from './MobileNav'
 import SearchButton from './SearchButton'
 import ThemeSwitch from './ThemeSwitch'
 import SocialIcon from './social-icons'
-import { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { useSpring, a } from '@react-spring/web'
 
 const PmndrsHeader = () => {
+  const router = useRouter()
   const linksRef = useRef<HTMLDivElement>(null!)
   const homeRef = useRef<HTMLDivElement>(null!)
   const sectionRef = useRef<HTMLElement | null>(null)
@@ -20,6 +21,9 @@ const PmndrsHeader = () => {
   const pathname = usePathname()
   const isHome = pathname === '/'
   const prevIsHome = useRef(isHome)
+  const prefetchHome = useCallback(() => {
+    router.prefetch('/')
+  }, [router])
 
   const [winWidth, setWinWidth] = useState(() =>
     typeof window === 'undefined' ? 0 : window.innerWidth
@@ -81,14 +85,20 @@ const PmndrsHeader = () => {
 
   return (
     <>
-      <header className="absolute left-[calc((100%-100vw)/2)] top-0 z-[1] flex h-[130px] w-[100%] items-center py-10">
+      <header className="absolute top-0 left-[calc((100%-100vw)/2)] z-[1] flex h-[130px] w-[100%] items-center py-10">
         <a.div
           ref={homeRef}
           className="absolute"
           style={{ x: props.homeX, opacity: props.homeOpacity }}
         >
           {!isHome && (
-            <Link href="/" aria-label={siteMetadata.headerTitle}>
+            <Link
+              href="/"
+              aria-label={siteMetadata.headerTitle}
+              onMouseEnter={prefetchHome}
+              onFocus={prefetchHome}
+              onTouchStart={prefetchHome}
+            >
               <div className="flex items-center justify-between">
                 <Logo className="size-10 dark:invert" />
               </div>
@@ -97,18 +107,17 @@ const PmndrsHeader = () => {
         </a.div>
         <a.div
           ref={linksRef}
-          className="flex flex-col items-end gap-[8px]"
+          className="flex flex-col items-end gap-2"
           style={{ x: props.linksX, opacity: props.linkOpacity }}
         >
-          <div className="flex items-center space-x-4 leading-5 sm:space-x-6">
+          <div className="flex w-full items-center justify-end gap-4 leading-5 sm:gap-6">
             {headerNavLinks
               .filter((link) => link.href !== '/')
               .map((link) => (
                 <Link
                   key={link.title}
                   href={link.href}
-                  className="hidden font-medium text-gray-900 hover:text-primary-500 dark:text-gray-100 dark:hover:opacity-60
-              sm:block"
+                  className="hover:text-primary-500 hidden font-medium text-gray-900 sm:block dark:text-gray-100 dark:hover:opacity-60"
                 >
                   {link.title}
                 </Link>
@@ -118,7 +127,7 @@ const PmndrsHeader = () => {
             <MobileNav />
           </div>
 
-          <div className="mt-[8px] hidden space-x-4 sm:flex sm:space-x-6">
+          <div className="hidden w-full items-center justify-end gap-4 sm:flex sm:gap-6">
             <SocialIcon kind="github" href={siteMetadata.github} size={6} />
             <SocialIcon kind="discord" href={siteMetadata.discord} size={6} />
             <SocialIcon kind="twitter" href={siteMetadata.x} size={6} />

@@ -1,1 +1,9 @@
-{"react":2,"global-state":2,"valtio":1,"zustand":1,"pmndrs":1,"xr":1,"react-three":1}
+{
+  "react": 2,
+  "global-state": 2,
+  "valtio": 1,
+  "zustand": 1,
+  "pmndrs": 1,
+  "xr": 1,
+  "react-three": 1
+}

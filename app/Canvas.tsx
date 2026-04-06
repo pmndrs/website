@@ -1,5 +1,6 @@
 'use client'
 
+import { useCanvasApi } from './canvas-state'
 import CausticOverlay from '@/components/scenes/caustic/CausticOverlay'
 import CausticScene from '@/components/scenes/caustic/CausticScene'
 import { useSpring } from '@react-spring/web'
@@ -8,7 +9,6 @@ import { Canvas, invalidate, useThree } from '@react-three/fiber'
 import { usePathname } from 'next/navigation'
 import { memo, useEffect, useRef, useState } from 'react'
 import * as THREE from 'three'
-import { create } from 'zustand'
 
 THREE.Texture.DEFAULT_ANISOTROPY = 8
 
@@ -21,6 +21,8 @@ export default function PmndrsCanvas() {
   const onPause = useCanvasApi((state) => state.onPause)
   const onPlay = useCanvasApi((state) => state.onPlay)
   const isLoaded = useCanvasApi((state) => state.isLoaded)
+  const pause = useCanvasApi((state) => state.pause)
+  const reset = useCanvasApi((state) => state.reset)
   const prevIsLoaded = useRef(isLoaded)
 
   const pathname = usePathname()
@@ -59,6 +61,13 @@ export default function PmndrsCanvas() {
   const [props, springApi] = useSpring(() => ({
     opacity: 0,
   }))
+
+  useEffect(() => {
+    return () => {
+      pause()
+      reset()
+    }
+  }, [pause, reset])
 
   useEffect(() => {
     const onPlayHandler = () => {
@@ -109,7 +118,7 @@ export default function PmndrsCanvas() {
           parentRef.current = node.parentElement!.parentElement! as HTMLDivElement
         }}
         shadows
-        dpr={[1, perfSucks ? 1.5 : 2]}
+        dpr={[1, perfSucks ? 1.25 : 1.75]}
         eventSource={document.getElementById('root')!}
         eventPrefix="client"
         camera={{ position: [20, 0.9, 20], fov: 26 }}
@@ -160,47 +169,3 @@ function SubscribeToFrameloop() {
 
   return null
 }
-
-type CanvasApi = {
-  isPaused: boolean
-  isLoaded: boolean
-  pause: () => void
-  play: () => void
-  onPauseCallbacks: (() => void)[]
-  onPlayCallbacks: (() => void)[]
-  onPause: (callback: () => void) => () => void
-  onPlay: (callback: () => void) => () => void
-  setIsLoaded: (isLoaded: boolean) => void
-}
-
-export const useCanvasApi = create<CanvasApi>((set, get) => ({
-  isPaused: true,
-  isLoaded: false,
-  onPauseCallbacks: [],
-  onPlayCallbacks: [],
-  onPause: (callback) => {
-    set((state) => ({ onPauseCallbacks: [...state.onPauseCallbacks, callback] }))
-    return () =>
-      set((state) => ({
-        onPauseCallbacks: state.onPauseCallbacks.filter((fn) => fn !== callback),
-      }))
-  },
-  onPlay: (callback) => {
-    set((state) => ({ onPlayCallbacks: [...state.onPlayCallbacks, callback] }))
-    return () =>
-      set((state) => ({
-        onPlayCallbacks: state.onPlayCallbacks.filter((fn) => fn !== callback),
-      }))
-  },
-  pause: () => {
-    set({ isPaused: true })
-    const onPause = get().onPauseCallbacks
-    onPause.forEach((fn) => fn())
-  },
-  play: () => {
-    set({ isPaused: false })
-    const onPlay = get().onPlayCallbacks
-    onPlay.forEach((fn) => fn())
-  },
-  setIsLoaded: (isLoaded) => set({ isLoaded }),
-}))

@@ -1,6 +1,6 @@
 'use client'
 import { useLayoutEffect } from 'react'
-import { useCanvasApi } from './Canvas'
+import { useCanvasApi } from './canvas-state'
 
 export function Hero() {
   const { pause, play } = useCanvasApi()

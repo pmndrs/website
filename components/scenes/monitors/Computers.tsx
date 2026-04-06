@@ -1,6 +1,7 @@
+'use client'
 import * as THREE from 'three'
-import { useMemo, useContext, createContext, useRef } from 'react'
-import { ThreeElements, useFrame } from '@react-three/fiber'
+import { useMemo, useContext, createContext, useRef, useEffect } from 'react'
+import { ThreeElements, useFrame, useThree } from '@react-three/fiber'
 import { useGLTF, Merged, RenderTexture, PerspectiveCamera, Text } from '@react-three/drei'
 import { SpinningBox } from './SpinningBox'
 
@@ -658,7 +659,7 @@ function ScreenText({
   return (
     <Screen {...props}>
       <PerspectiveCamera makeDefault manual aspect={1 / 1} position={[0, 0, 15]} />
-      <color attach="background" args={[invert ? 'black' : '#35c19f']} />
+      <SceneBackground color={invert ? 'black' : '#35c19f'} />
       <ambientLight intensity={0.5} />
       <directionalLight position={[10, 10, 5]} />
       <Text
@@ -680,13 +681,23 @@ function ScreenInteractive(props: React.ComponentPropsWithoutRef<typeof Screen>)
   return (
     <Screen {...props}>
       <PerspectiveCamera makeDefault manual aspect={1 / 1} position={[0, 0, 10]} />
-      <color attach="background" args={['orange']} />
+      <SceneBackground color="orange" />
       <ambientLight intensity={Math.PI / 2} />
       <pointLight decay={0} position={[10, 10, 10]} intensity={Math.PI} />
       <pointLight decay={0} position={[-10, -10, -10]} />
       <SpinningBox position={[-3.15, 0.75, 0]} scale={0.5} />
     </Screen>
   )
+}
+
+function SceneBackground({ color }: { color: string }) {
+  const scene = useThree((state) => state.scene)
+
+  useEffect(() => {
+    scene.background = new THREE.Color(color)
+  }, [color, scene])
+
+  return null
 }
 
 // Renders flashing LED's
