@@ -107,10 +107,10 @@ const PmndrsHeader = () => {
         </a.div>
         <a.div
           ref={linksRef}
-          className="flex flex-col items-end gap-[8px]"
+          className="flex flex-col items-end gap-2"
           style={{ x: props.linksX, opacity: props.linkOpacity }}
         >
-          <div className="flex items-center space-x-4 leading-5 sm:space-x-6">
+          <div className="flex w-full items-center justify-end gap-4 leading-5 sm:gap-6">
             {headerNavLinks
               .filter((link) => link.href !== '/')
               .map((link) => (
@@ -127,7 +127,7 @@ const PmndrsHeader = () => {
             <MobileNav />
           </div>
 
-          <div className="mt-[8px] hidden space-x-4 sm:flex sm:space-x-6">
+          <div className="hidden w-full items-center justify-end gap-4 sm:flex sm:gap-6">
             <SocialIcon kind="github" href={siteMetadata.github} size={6} />
             <SocialIcon kind="discord" href={siteMetadata.discord} size={6} />
             <SocialIcon kind="twitter" href={siteMetadata.x} size={6} />
