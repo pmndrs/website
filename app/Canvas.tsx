@@ -1,18 +1,19 @@
 'use client'
 
 import { useCanvasApi } from './canvas-state'
-import CausticOverlay from '@/components/scenes/caustic/CausticOverlay'
-import CausticScene from '@/components/scenes/caustic/CausticScene'
+import FlowShieldControls from '@/components/scenes/flow-shield/FlowShieldControls'
+import FlowShieldOverlay from '@/components/scenes/flow-shield/FlowShieldOverlay'
+import FlowShieldScene from '@/components/scenes/flow-shield/FlowShieldScene'
 import { useSpring } from '@react-spring/web'
 import { PerformanceMonitor } from '@react-three/drei'
 import { Canvas, invalidate, useThree } from '@react-three/fiber'
 import { usePathname } from 'next/navigation'
-import { memo, useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import * as THREE from 'three'
 
 THREE.Texture.DEFAULT_ANISOTROPY = 8
 
-const Scene = memo(CausticScene)
+const Scene = FlowShieldScene
 
 export default function PmndrsCanvas() {
   const parentRef = useRef<HTMLDivElement>(null!)
@@ -111,7 +112,8 @@ export default function PmndrsCanvas() {
 
   return (
     <>
-      <CausticOverlay show={showOverlay} />
+      <FlowShieldControls show={isHome} />
+      <FlowShieldOverlay show={showOverlay} />
       <Canvas
         ref={(node) => {
           if (!node) return
