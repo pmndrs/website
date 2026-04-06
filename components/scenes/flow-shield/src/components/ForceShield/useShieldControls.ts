@@ -41,53 +41,49 @@ const SHIELD_DEFAULTS = {
 } as const
 
 export function useShieldControls(lifeRef: MutableRefObject<number>) {
-  const [controls, setControls] = useControls(
-    'Shield',
-    () => ({
-      color: { value: SHIELD_DEFAULTS.color, label: 'Color' },
-      opacity: { value: SHIELD_DEFAULTS.opacity, min: 0.2, max: 1, step: 0.01, label: 'Opacity' },
-      showHex: { value: SHIELD_DEFAULTS.showHex, label: 'Hex Grid' },
-      hexScale: {
-        value: SHIELD_DEFAULTS.hexScale,
-        min: 1,
-        max: 8,
-        step: 0.1,
-        label: 'Hex Size',
-      },
-      hexOpacity: {
-        value: SHIELD_DEFAULTS.hexOpacity,
-        min: 0,
-        max: 0.5,
-        step: 0.01,
-        label: 'Hex Strength',
-      },
-      flowSpeed: {
-        value: SHIELD_DEFAULTS.flowSpeed,
-        min: 0,
-        max: 2,
-        step: 0.01,
-        label: 'Flow Speed',
-      },
-      flowIntensity: {
-        value: SHIELD_DEFAULTS.flowIntensity,
-        min: 0,
-        max: 4,
-        step: 0.05,
-        label: 'Flow Strength',
-      },
-      hitIntensity: {
-        value: SHIELD_DEFAULTS.hitIntensity,
-        min: 0,
-        max: 8,
-        step: 0.1,
-        label: 'Hit Glow',
-      },
-      'Reset Life': button(() => {
-        lifeRef.current = 1.0
-      }),
+  const [controls, setControls] = useControls(() => ({
+    color: { value: SHIELD_DEFAULTS.color, label: 'Color' },
+    opacity: { value: SHIELD_DEFAULTS.opacity, min: 0.2, max: 1, step: 0.01, label: 'Opacity' },
+    showHex: { value: SHIELD_DEFAULTS.showHex, label: 'Hex Grid' },
+    hexScale: {
+      value: SHIELD_DEFAULTS.hexScale,
+      min: 1,
+      max: 8,
+      step: 0.1,
+      label: 'Hex Size',
+    },
+    hexOpacity: {
+      value: SHIELD_DEFAULTS.hexOpacity,
+      min: 0,
+      max: 0.5,
+      step: 0.01,
+      label: 'Hex Strength',
+    },
+    flowSpeed: {
+      value: SHIELD_DEFAULTS.flowSpeed,
+      min: 0,
+      max: 2,
+      step: 0.01,
+      label: 'Flow Speed',
+    },
+    flowIntensity: {
+      value: SHIELD_DEFAULTS.flowIntensity,
+      min: 0,
+      max: 4,
+      step: 0.05,
+      label: 'Flow Strength',
+    },
+    hitIntensity: {
+      value: SHIELD_DEFAULTS.hitIntensity,
+      min: 0,
+      max: 8,
+      step: 0.1,
+      label: 'Hit Glow',
+    },
+    'Reset Life': button(() => {
+      lifeRef.current = 1.0
     }),
-    { collapsed: true }
-  )
+  }))
 
   return [{ ...SHIELD_DEFAULTS, ...controls }, setControls] as const
 }

@@ -26,14 +26,16 @@ export default function FlowShieldOverlay({ show = true }: { show?: boolean }) {
           Interactive sci-fi shielding with hit detection, procedural hexes, flowing noise, and
           custom shader work in React Three Fiber.
         </p>
-        <div className="pointer-events-auto mt-6 flex items-center gap-4">
+        <p className="mt-3 text-[11px] tracking-[0.15em] text-white/40 uppercase">
+          by Christian Oritz
+        </p>
+        <div className="pointer-events-auto mt-5 flex items-center gap-4">
           <Link
             href="/blog/creating-flow-shield"
             className="rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm font-medium text-white backdrop-blur-sm transition hover:bg-white/15"
           >
             Read article
           </Link>
-          <span className="text-xs tracking-[0.2em] text-white/45 uppercase">Click the shield</span>
         </div>
       </div>
 
