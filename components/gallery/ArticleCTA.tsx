@@ -9,7 +9,7 @@ export function ArticleCTA({ article }: { article: Article }) {
   const [collapsed, setCollapsed] = useState(false)
 
   return (
-    <div className="pointer-events-none fixed bottom-4 left-4 z-[60] sm:bottom-8 sm:left-8">
+    <div className="pointer-events-none fixed bottom-4 left-4 z-40 sm:bottom-8 sm:left-8">
       <div className="relative">
         {collapsed ? (
           <button
