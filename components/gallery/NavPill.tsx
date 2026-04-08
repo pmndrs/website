@@ -73,10 +73,10 @@ export function NavPill() {
 function PillIconButton({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div className="group relative grid h-[1.8rem] w-[1.8rem] place-items-center rounded-full text-[#555] transition-colors duration-150 hover:bg-black/6 hover:text-[#111] dark:text-[#aaa] dark:hover:bg-white/8 dark:hover:text-white">
-      <div className="flex h-[0.95rem] w-[0.95rem] items-center justify-center [&_button]:!p-0 [&_a]:flex [&_svg]:h-[0.95rem] [&_svg]:w-[0.95rem]">
+      <div className="flex h-[0.95rem] w-[0.95rem] items-center justify-center [&_a]:flex [&_button]:!p-0 [&_svg]:h-[0.95rem] [&_svg]:w-[0.95rem]">
         {children}
       </div>
-      <span className="pointer-events-none absolute top-full left-1/2 z-20 mt-[0.45rem] -translate-x-1/2 whitespace-nowrap rounded bg-[#222] px-2 py-1 text-[0.65rem] text-white opacity-0 transition-opacity duration-150 group-hover:opacity-100 dark:bg-[#eee] dark:text-black">
+      <span className="pointer-events-none absolute top-full left-1/2 z-20 mt-[0.45rem] -translate-x-1/2 rounded bg-[#222] px-2 py-1 text-[0.65rem] whitespace-nowrap text-white opacity-0 transition-opacity duration-150 group-hover:opacity-100 dark:bg-[#eee] dark:text-black">
         {label}
       </span>
     </div>
