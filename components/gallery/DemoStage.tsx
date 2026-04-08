@@ -39,13 +39,13 @@ export function DemoStage({ demo }: { demo: Demo | null }) {
   }, [])
 
   return (
-    <div ref={containerRef} className="relative h-full w-full min-w-0 min-h-0">
+    <div ref={containerRef} className="relative h-full min-h-0 w-full min-w-0">
       {demo ? (
         <iframe
           key={demo.embedUrl}
           src={demo.embedUrl}
           title={demo.name}
-          className="absolute border-none bg-white rounded-2xl shadow-[0_24px_60px_rgb(0_0_0/0.16)] transition-shadow duration-200"
+          className="absolute rounded-2xl border-none bg-white shadow-[0_24px_60px_rgb(0_0_0/0.16)] transition-shadow duration-200"
           style={{
             inset: '50% auto auto 50%',
             width: `${frame.width}px`,

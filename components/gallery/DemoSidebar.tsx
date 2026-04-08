@@ -137,7 +137,7 @@ export function DemoSidebar({ demos, selected, collapsed, onSelect, onToggle }: 
               >
                 <div className="relative aspect-video w-full overflow-hidden">
                   {d.isNew && (
-                    <span className="absolute top-1.5 right-1.5 z-[1] rounded-full bg-[#e8756a] px-[7px] py-0.5 text-[0.55rem] font-bold tracking-[0.06em] text-white uppercase leading-[1.5]">
+                    <span className="absolute top-1.5 right-1.5 z-[1] rounded-full bg-[#e8756a] px-[7px] py-0.5 text-[0.55rem] leading-[1.5] font-bold tracking-[0.06em] text-white uppercase">
                       New
                     </span>
                   )}
