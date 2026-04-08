@@ -87,6 +87,19 @@ export default function PostLayout({ content, authorDetails, next, prev, childre
                             </Link>
                           )}
                         </dd>
+                        <dt className="sr-only">YouTube</dt>
+                        <dd>
+                          {author.youtube && (
+                            <Link
+                              href={author.youtube}
+                              className="text-primary-500 hover:text-primary-600 dark:hover:text-primary-400"
+                            >
+                              {author.youtube
+                                .replace('https://www.youtube.com/', '')
+                                .replace('https://youtube.com/', '')}
+                            </Link>
+                          )}
+                        </dd>
                       </dl>
                     </li>
                   ))}
