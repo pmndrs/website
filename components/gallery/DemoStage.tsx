@@ -39,7 +39,7 @@ export function DemoStage({ demo }: { demo: Demo | null }) {
   }, [])
 
   return (
-    <div ref={containerRef} className="relative min-h-0 h-full w-full min-w-0">
+    <div ref={containerRef} className="relative h-full min-h-0 w-full min-w-0">
       {demo ? (
         <iframe
           key={demo.embedUrl}
