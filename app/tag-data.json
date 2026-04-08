@@ -1,13 +1,13 @@
 {
+  "react": 2,
+  "global-state": 2,
+  "valtio": 1,
+  "zustand": 1,
   "react-three-fiber": 1,
   "glsl": 1,
   "shaders": 1,
   "vfx": 1,
-  "react": 2,
-  "global-state": 2,
-  "zustand": 1,
-  "valtio": 1,
+  "pmndrs": 1,
   "xr": 1,
-  "react-three": 1,
-  "pmndrs": 1
+  "react-three": 1
 }

@@ -2,15 +2,12 @@ import 'css/tailwind.css'
 import 'pliny/search/algolia.css'
 import 'remark-github-blockquote-alert/alert.css'
 
-import { NullFooter } from '@/components/NullFooter'
-import Header from '@/components/PmndrsHeader'
-import SectionContainer from '@/components/SectionContainer'
+import { NavPill } from '@/components/gallery/NavPill'
 import siteMetadata from '@/data/siteMetadata'
 import { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import { SearchConfig, SearchProvider } from 'pliny/search'
 import { ThemeProviders } from './theme-providers'
-import ClientSceneShell from './ClientSceneShell'
 
 const inter = Inter({
   subsets: ['latin'],
@@ -96,18 +93,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <link rel="alternate" type="application/rss+xml" href={`${basePath}/feed.xml`} />
       <body className="bg-white pl-[calc(100vw-100%)] text-black antialiased dark:bg-[rgb(13,13,13)] dark:text-white">
         <ThemeProviders>
-          <div className="relative z-[0]">
-            <ClientSceneShell />
-            <SectionContainer>
-              <div className="flex h-screen flex-col justify-between font-sans">
-                <SearchProvider searchConfig={siteMetadata.search as SearchConfig}>
-                  <Header />
-                  <main className="mb-auto">{children}</main>
-                </SearchProvider>
-                <NullFooter />
-              </div>
-            </SectionContainer>
-          </div>
+          <SearchProvider searchConfig={siteMetadata.search as SearchConfig}>
+            <NavPill />
+            {children}
+          </SearchProvider>
         </ThemeProviders>
       </body>
     </html>
