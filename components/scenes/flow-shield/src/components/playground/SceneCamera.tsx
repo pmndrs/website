@@ -4,7 +4,7 @@ import { useRef, useEffect } from 'react'
 import type { ComponentRef } from 'react'
 import { useThree } from '@react-three/fiber'
 import { OrbitControls } from '@react-three/drei'
-import { MathUtils } from 'three'
+import { MathUtils, PerspectiveCamera } from 'three'
 import type { Preset } from '../../types'
 
 const DEFAULT_POS: [number, number, number] = [8, 5, 8]
@@ -20,8 +20,10 @@ export default function SceneCamera({ preset = 'default' }: { preset?: Preset })
 
   useEffect(() => {
     camera.position.set(...DEFAULT_POS)
-    camera.fov = 26
-    camera.updateProjectionMatrix()
+    if (camera instanceof PerspectiveCamera) {
+      camera.fov = 26
+      camera.updateProjectionMatrix()
+    }
   }, [camera])
 
   // Re-center camera when preset changes

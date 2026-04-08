@@ -7,7 +7,8 @@ import { LEVA_THEME } from '../theme/theme'
 import SceneContent from './SceneContent'
 import type { SceneMode } from './SceneContent'
 import UIOverlay from '../overlay/UIOverlay'
-import OverlayButtons, { type Preset } from '../overlay/OverlayButtons'
+import OverlayButtons from '../overlay/OverlayButtons'
+import type { Preset } from '../../types'
 import LoadingOverlay from '../overlay/LoadingOverlay'
 
 export default function PlaygroundCanvas() {
