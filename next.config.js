@@ -21,7 +21,7 @@ const ContentSecurityPolicy = `
   img-src * blob: data:;
   media-src 'self' *.s3.amazonaws.com;
   font-src 'self';
-  frame-src giscus.app
+  frame-src giscus.app pmndrs.github.io;
 `
 
 const securityHeaders = [
@@ -91,6 +91,10 @@ module.exports = () => {
         {
           protocol: 'https',
           hostname: 'picsum.photos',
+        },
+        {
+          protocol: 'https',
+          hostname: 'pmndrs.github.io',
         },
       ],
       unoptimized,

@@ -1,5 +1,6 @@
-import { Hero } from './Hero'
+import { demos } from '@/data/demos'
+import { GalleryShell } from '@/components/gallery/GalleryShell'
 
-export default async function Page() {
-  return <Hero />
+export default function Page() {
+  return <GalleryShell demos={demos} />
 }

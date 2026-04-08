@@ -43,23 +43,24 @@ const PmndrsHeader = () => {
     homeOpacity: 0,
   }))
 
-  // Get the section element which we will use for measuring content dimensions.
+  // Re-query the section element on route change (home has none, inner pages do).
   useLayoutEffect(() => {
-    if (sectionRef.current) return
     sectionRef.current = document.querySelector('section')
     return () => {
       sectionRef.current = null
     }
-  }, [])
+  }, [pathname])
 
   useLayoutEffect(() => {
-    if (!linksRef.current || !sectionRef.current) return
+    if (!linksRef.current) return
 
     const linksWidth = linksRef.current.offsetWidth
-    const sectionWidthWithoutPadding =
-      parseFloat(window.getComputedStyle(sectionRef.current).width) -
-      parseFloat(window.getComputedStyle(sectionRef.current).paddingLeft) -
-      parseFloat(window.getComputedStyle(sectionRef.current).paddingRight)
+    const section = sectionRef.current
+    const sectionWidthWithoutPadding = section
+      ? parseFloat(window.getComputedStyle(section).width) -
+        parseFloat(window.getComputedStyle(section).paddingLeft) -
+        parseFloat(window.getComputedStyle(section).paddingRight)
+      : winWidth
     const hasHomeChanged = prevIsHome.current !== isHome
 
     let linksX = 0
@@ -85,7 +86,7 @@ const PmndrsHeader = () => {
 
   return (
     <>
-      <header className="absolute top-0 left-[calc((100%-100vw)/2)] z-[1] flex h-[130px] w-[100%] items-center py-10">
+      <header className="fixed top-0 left-0 z-50 flex h-[130px] w-screen items-center py-10">
         <a.div
           ref={homeRef}
           className="absolute"
@@ -134,8 +135,7 @@ const PmndrsHeader = () => {
           </div>
         </a.div>
       </header>
-      {/* A filler so there header takes up space in flow. */}
-      <div className="h-[90px] shrink-0" />
+      {!isHome && <div className="h-[90px] shrink-0" />}
     </>
   )
 }
