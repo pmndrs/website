@@ -48,7 +48,10 @@ export function NavPill() {
           </Link>
         ))}
 
-        <span className="mx-0.5 hidden h-4 w-px bg-black/10 sm:block dark:bg-white/10" aria-hidden />
+        <span
+          className="mx-0.5 hidden h-4 w-px bg-black/10 sm:block dark:bg-white/10"
+          aria-hidden
+        />
 
         <div className="hidden items-center gap-px sm:flex">
           <PillIconButton label="Search">
@@ -90,21 +93,25 @@ function MobileMoreMenu() {
         </svg>
       </MenuButton>
 
-      <MenuItems static={false} className="absolute top-full right-0 z-[60] mt-2 min-w-[12rem] rounded-2xl bg-white p-2 shadow-[0_10px_30px_rgb(0_0_0/0.12)] ring-1 ring-black/5 focus:outline-none dark:bg-[#1a1a1a] dark:ring-white/10">
+      <MenuItems
+        static={false}
+        className="absolute top-full right-0 z-[60] mt-2 min-w-[12rem] rounded-2xl bg-white p-2 shadow-[0_10px_30px_rgb(0_0_0/0.12)] ring-1 ring-black/5 focus:outline-none dark:bg-[#1a1a1a] dark:ring-white/10"
+      >
         <div className="flex flex-col gap-1">
           {/* Search — whole row triggers the nested SearchButton */}
-          <div
-            className="flex h-10 cursor-pointer items-center rounded-xl px-3 text-[#555] hover:bg-black/6 dark:text-[#aaa] dark:hover:bg-white/8"
+          <button
+            type="button"
+            className="flex h-10 w-full cursor-pointer items-center rounded-xl px-3 text-[#555] hover:bg-black/6 dark:text-[#aaa] dark:hover:bg-white/8"
             onClick={(e) => {
-              const btn = e.currentTarget.querySelector('button')
-              if (btn && e.target === e.currentTarget) btn.click()
+              const btn = e.currentTarget.querySelector<HTMLButtonElement>('[aria-label="Search"]')
+              if (btn) btn.click()
             }}
           >
             <span className="text-[0.8rem] font-medium">Search</span>
             <div className="ml-auto flex h-[0.95rem] w-[0.95rem] items-center justify-center [&_button]:!p-0 [&_svg]:h-[0.95rem] [&_svg]:w-[0.95rem]">
               <SearchButton />
             </div>
-          </div>
+          </button>
 
           {/* Theme — inline buttons to avoid nested Headless UI Menu */}
           <MobileThemeRow />
