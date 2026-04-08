@@ -21,8 +21,8 @@ export function GalleryShell({ demos }: { demos: Demo[] }) {
       />
       <main className="relative flex min-w-0 flex-1 items-center justify-center overflow-hidden p-6">
         <DemoStage demo={selected} />
-        <ArticleCTA article={demos[0].article!} />
       </main>
+      <ArticleCTA article={demos[0].article!} />
     </div>
   )
 }
