@@ -59,9 +59,9 @@ export default function PostLayout({ content, authorDetails, next, prev, childre
     <SectionContainer>
       <ScrollTopAndComment />
       <article>
-        <div className="divide-y divide-gray-200 dark:divide-gray-700">
+        <div>
           <header className="pt-6">
-            <div className="mx-auto max-w-3xl space-y-6 pb-10">
+            <div className="mx-auto max-w-3xl space-y-6 border-b border-gray-200 pb-10 dark:border-gray-700">
               <dl>
                 <div>
                   <dt className="sr-only">Published on</dt>
@@ -73,7 +73,7 @@ export default function PostLayout({ content, authorDetails, next, prev, childre
                   </dd>
                 </div>
               </dl>
-              <h1 className="max-w-4xl text-4xl leading-[1] font-semibold tracking-tight text-gray-950 sm:text-5xl md:text-6xl dark:text-gray-50">
+              <h1 className="max-w-4xl text-pretty text-4xl leading-[1] font-semibold tracking-tight text-gray-950 sm:text-5xl md:text-6xl dark:text-gray-50">
                 {title}
               </h1>
               {byline && (
