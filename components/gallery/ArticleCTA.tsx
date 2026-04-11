@@ -16,7 +16,7 @@ export function ArticleCTA({ article }: { article: Article }) {
             type="button"
             onClick={() => setCollapsed(false)}
             aria-label="Show new article"
-            className="pointer-events-auto flex h-11 min-w-[5.5rem] items-center justify-center gap-2 rounded-full border border-[#d4d4d4] bg-white/92 px-3 text-[#666] shadow-[0_10px_30px_rgb(0_0_0/0.12)]"
+            className="pointer-events-auto flex h-11 min-w-[5.5rem] items-center justify-center gap-2 rounded-full border border-[#d4d4d4] bg-white px-3 text-[#666] shadow-[0_10px_30px_rgb(0_0_0/0.12)]"
           >
             <span className="text-[0.6rem] leading-none tracking-[0.08em] uppercase">
               New Article

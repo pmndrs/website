@@ -1,8 +1,8 @@
 'use client'
 
+import { Demo } from '@/data/demos'
 import Image from 'next/image'
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { Demo } from '@/data/demos'
 
 // The same motion curve used in the examples site
 const MOTION_CURVE =
@@ -73,7 +73,7 @@ export function DemoSidebar({ demos, selected, collapsed, onSelect, onToggle }: 
       <button
         onClick={onToggle}
         aria-label={collapsed ? 'Show demos' : 'Hide demos'}
-        className="absolute top-1/2 right-0 z-10 grid h-[5.5rem] w-11 cursor-pointer place-items-center rounded-full border border-[#d4d4d4] bg-white/92 text-[#666] shadow-[0_10px_30px_rgb(0_0_0/0.12)] hover:bg-[#f5f5f5] hover:text-[#222] hover:shadow-[0_14px_36px_rgb(0_0_0/0.16)]"
+        className="absolute top-1/2 right-0 z-10 grid h-[5.5rem] w-11 cursor-pointer place-items-center rounded-full border border-[#d4d4d4] bg-white text-[#666] shadow-[0_10px_30px_rgb(0_0_0/0.12)] hover:bg-[#f5f5f5] hover:text-[#222] hover:shadow-[0_14px_36px_rgb(0_0_0/0.16)]"
         style={{
           translate: collapsed ? (near ? '75% -50%' : '25% -50%') : '50% -50%',
           transition: `background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease, translate 0.25s ease`,
