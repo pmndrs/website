@@ -57,16 +57,14 @@ export function NavPill() {
         <div className="hidden items-center gap-px sm:flex">
           <PillButton
             tooltip="Search"
-            className="grid h-[1.8rem] w-[1.8rem] place-items-center"
-            contentClassName="flex h-[0.95rem] w-[0.95rem] items-center justify-center [&_a]:flex [&_button]:!p-0 [&_svg]:h-[0.95rem] [&_svg]:w-[0.95rem]"
+            className="grid h-[1.8rem] w-[1.8rem] place-items-center [&_button]:!p-0 [&_svg]:h-[0.95rem] [&_svg]:w-[0.95rem]"
           >
             <SearchButton />
           </PillButton>
 
           <PillButton
             tooltip="Theme"
-            className="grid h-[1.8rem] w-[1.8rem] place-items-center"
-            contentClassName="flex h-[0.95rem] w-[0.95rem] items-center justify-center [&_a]:flex [&_button]:!p-0 [&_svg]:h-[0.95rem] [&_svg]:w-[0.95rem]"
+            className="grid h-[1.8rem] w-[1.8rem] place-items-center [&_button]:!p-0 [&_svg]:h-[0.95rem] [&_svg]:w-[0.95rem]"
           >
             <ThemeSwitch />
           </PillButton>
@@ -81,7 +79,6 @@ export function NavPill() {
                 rel="noopener noreferrer"
                 aria-label={label}
                 className="grid h-[1.8rem] w-[1.8rem] place-items-center"
-                contentClassName="flex h-[0.95rem] w-[0.95rem] items-center justify-center [&_svg]:h-[0.95rem] [&_svg]:w-[0.95rem]"
               >
                 <Icon className="h-[0.95rem] w-[0.95rem] fill-current" />
               </PillButton>

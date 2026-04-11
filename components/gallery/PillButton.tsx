@@ -3,7 +3,6 @@ import type { ReactNode, MouseEventHandler } from 'react'
 type PillButtonProps = {
   children: ReactNode
   className?: string
-  contentClassName?: string
   tooltip?: string
   standalone?: boolean
   href?: string
@@ -16,7 +15,6 @@ type PillButtonProps = {
 export function PillButton({
   children,
   className,
-  contentClassName,
   tooltip,
   standalone = false,
   href,
@@ -41,24 +39,16 @@ export function PillButton({
     .filter(Boolean)
     .join(' ')
 
-  const content = contentClassName ? (
-    <span className={contentClassName}>{children}</span>
-  ) : (
-    children
-  )
-
   const surface = href ? (
     <a className={surfaceClassName} href={href} target={target} rel={rel} aria-label={ariaLabel}>
-      {content}
+      {children}
     </a>
   ) : onClick ? (
     <button className={surfaceClassName} onClick={onClick} type="button" aria-label={ariaLabel}>
-      {content}
+      {children}
     </button>
   ) : (
-    <div className={surfaceClassName}>
-      <div className={contentClassName}>{children}</div>
-    </div>
+    <div className={surfaceClassName}>{children}</div>
   )
 
   return (

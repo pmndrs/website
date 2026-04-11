@@ -17,8 +17,7 @@ export function ArticleCTA({ article }: { article: Article }) {
             standalone
             onClick={() => setCollapsed(false)}
             aria-label="Show new article"
-            className="flex"
-            contentClassName="pointer-events-auto flex h-8 min-w-[5.5rem] items-center justify-center gap-2 px-3"
+            className="pointer-events-auto flex h-8 min-w-[5.5rem] items-center justify-center gap-2 px-3"
           >
             <span className="text-[0.6rem] leading-none tracking-[0.08em] uppercase">
               New Article

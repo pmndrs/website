@@ -74,7 +74,7 @@ export function DemoSidebar({ demos, selected, collapsed, onSelect, onToggle }: 
       <div
         className="absolute top-1/2 right-2 z-10"
         style={{
-          translate: collapsed ? (near ? '85% -50%' : '45% -50%') : '50% -50%',
+          translate: collapsed ? (near ? '95% -50%' : '45% -50%') : '50% -50%',
           transition: 'translate 0.25s ease',
         }}
       >
@@ -82,8 +82,7 @@ export function DemoSidebar({ demos, selected, collapsed, onSelect, onToggle }: 
           standalone
           onClick={onToggle}
           aria-label={collapsed ? 'Show demos' : 'Hide demos'}
-          className="grid h-[5.5rem] w-9 place-items-center hover:bg-[#f5f5f5] hover:text-[#222]"
-          contentClassName="flex h-full w-full items-center justify-center"
+          className="grid h-[5rem] w-8 place-items-center hover:bg-[#f5f5f5] hover:text-[#222]"
         >
           <span className="flex flex-col items-center gap-1.5">
             <svg
