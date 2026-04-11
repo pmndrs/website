@@ -3,6 +3,7 @@
 import { Demo } from '@/data/demos'
 import Image from 'next/image'
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { PillButton } from './PillButton'
 
 // The same motion curve used in the examples site
 const MOTION_CURVE =
@@ -44,6 +45,7 @@ export function DemoSidebar({ demos, selected, collapsed, onSelect, onToggle }: 
       setNear(false)
       return
     }
+
     const onMove = (e: MouseEvent) => setNear(e.clientX < 120)
     window.addEventListener('mousemove', onMove)
     return () => window.removeEventListener('mousemove', onMove)
@@ -69,43 +71,48 @@ export function DemoSidebar({ demos, selected, collapsed, onSelect, onToggle }: 
         transition: `margin-inline-start 1078ms ${MOTION_CURVE}`,
       }}
     >
-      {/* Floating collapse toggle */}
-      <button
-        onClick={onToggle}
-        aria-label={collapsed ? 'Show demos' : 'Hide demos'}
-        className="absolute top-1/2 right-0 z-10 grid h-[5.5rem] w-11 cursor-pointer place-items-center rounded-full border border-[#d4d4d4] bg-white text-[#666] shadow-[0_10px_30px_rgb(0_0_0/0.12)] hover:bg-[#f5f5f5] hover:text-[#222] hover:shadow-[0_14px_36px_rgb(0_0_0/0.16)]"
+      <div
+        className="absolute top-1/2 right-2 z-10"
         style={{
-          translate: collapsed ? (near ? '75% -50%' : '25% -50%') : '50% -50%',
-          transition: `background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease, translate 0.25s ease`,
+          translate: collapsed ? (near ? '85% -50%' : '45% -50%') : '50% -50%',
+          transition: 'translate 0.25s ease',
         }}
       >
-        <span className="flex flex-col items-center gap-1.5">
-          <svg
-            viewBox="0 0 6 10"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-[0.7rem] w-[0.7rem]"
-            style={{
-              transform: collapsed ? 'rotate(180deg)' : 'rotate(0deg)',
-              transition: `transform 1078ms ${MOTION_CURVE}`,
-            }}
-          >
-            <path
-              d="M5 1L1 5L5 9"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-          <span
-            className="text-[0.6rem] leading-none tracking-[0.08em] uppercase"
-            style={{ writingMode: 'vertical-rl', textOrientation: 'mixed' }}
-          >
-            {collapsed ? 'show' : 'hide'}
+        <PillButton
+          standalone
+          onClick={onToggle}
+          aria-label={collapsed ? 'Show demos' : 'Hide demos'}
+          className="grid h-[5.5rem] w-9 place-items-center hover:bg-[#f5f5f5] hover:text-[#222]"
+          contentClassName="flex h-full w-full items-center justify-center"
+        >
+          <span className="flex flex-col items-center gap-1.5">
+            <svg
+              viewBox="0 0 6 10"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-[0.7rem] w-[0.7rem]"
+              style={{
+                transform: collapsed ? 'rotate(180deg)' : 'rotate(0deg)',
+                transition: `transform 1078ms ${MOTION_CURVE}`,
+              }}
+            >
+              <path
+                d="M5 1L1 5L5 9"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+            <span
+              className="text-[0.6rem] leading-none tracking-[0.08em] uppercase"
+              style={{ writingMode: 'vertical-rl', textOrientation: 'mixed' }}
+            >
+              {collapsed ? 'show' : 'hide'}
+            </span>
           </span>
-        </span>
-      </button>
+        </PillButton>
+      </div>
 
       {/* Scrollable nav list */}
       <nav

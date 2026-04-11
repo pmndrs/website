@@ -1,15 +1,16 @@
 'use client'
 
-import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react'
 import Link from '@/components/Link'
-import Logo from '@/data/logo.svg'
-import ThemeSwitch from '@/components/ThemeSwitch'
 import SearchButton from '@/components/SearchButton'
-import { Github, Discord, Twitter } from '@/components/social-icons/icons'
-import siteMetadata from '@/data/siteMetadata'
+import { Discord, Github, Twitter } from '@/components/social-icons/icons'
+import ThemeSwitch from '@/components/ThemeSwitch'
+import { PillButton } from '@/components/gallery/PillButton'
 import headerNavLinks from '@/data/headerNavLinks'
-import { usePathname } from 'next/navigation'
+import Logo from '@/data/logo.svg'
+import siteMetadata from '@/data/siteMetadata'
+import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react'
 import { useTheme } from 'next-themes'
+import { usePathname } from 'next/navigation'
 
 const NAV_LINKS = headerNavLinks.filter((l) => l.href !== '/')
 
@@ -54,21 +55,36 @@ export function NavPill() {
         />
 
         <div className="hidden items-center gap-px sm:flex">
-          <PillIconButton label="Search">
+          <PillButton
+            tooltip="Search"
+            className="grid h-[1.8rem] w-[1.8rem] place-items-center"
+            contentClassName="flex h-[0.95rem] w-[0.95rem] items-center justify-center [&_a]:flex [&_button]:!p-0 [&_svg]:h-[0.95rem] [&_svg]:w-[0.95rem]"
+          >
             <SearchButton />
-          </PillIconButton>
+          </PillButton>
 
-          <PillIconButton label="Theme">
+          <PillButton
+            tooltip="Theme"
+            className="grid h-[1.8rem] w-[1.8rem] place-items-center"
+            contentClassName="flex h-[0.95rem] w-[0.95rem] items-center justify-center [&_a]:flex [&_button]:!p-0 [&_svg]:h-[0.95rem] [&_svg]:w-[0.95rem]"
+          >
             <ThemeSwitch />
-          </PillIconButton>
+          </PillButton>
 
           {iconLinks.map(({ href, Icon, label }) =>
             href ? (
-              <PillIconButton key={label} label={label}>
-                <a href={href} target="_blank" rel="noopener noreferrer" aria-label={label}>
-                  <Icon className="h-[0.95rem] w-[0.95rem] fill-current text-[#555] dark:text-[#aaa]" />
-                </a>
-              </PillIconButton>
+              <PillButton
+                key={label}
+                tooltip={label}
+                href={href}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={label}
+                className="grid h-[1.8rem] w-[1.8rem] place-items-center"
+                contentClassName="flex h-[0.95rem] w-[0.95rem] items-center justify-center [&_svg]:h-[0.95rem] [&_svg]:w-[0.95rem]"
+              >
+                <Icon className="h-[0.95rem] w-[0.95rem] fill-current" />
+              </PillButton>
             ) : null
           )}
         </div>
@@ -165,19 +181,6 @@ function MobileThemeRow() {
           </button>
         ))}
       </div>
-    </div>
-  )
-}
-
-function PillIconButton({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <div className="group relative grid h-[1.8rem] w-[1.8rem] place-items-center rounded-full text-[#555] transition-colors duration-150 hover:bg-black/6 hover:text-[#111] dark:text-[#aaa] dark:hover:bg-white/8 dark:hover:text-white">
-      <div className="flex h-[0.95rem] w-[0.95rem] items-center justify-center [&_a]:flex [&_button]:!p-0 [&_svg]:h-[0.95rem] [&_svg]:w-[0.95rem]">
-        {children}
-      </div>
-      <span className="pointer-events-none absolute top-full left-1/2 z-20 mt-[0.45rem] -translate-x-1/2 rounded bg-[#222] px-2 py-1 text-[0.65rem] whitespace-nowrap text-white opacity-0 transition-opacity duration-150 group-hover:opacity-100 dark:bg-[#eee] dark:text-black">
-        {label}
-      </span>
     </div>
   )
 }

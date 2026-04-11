@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Link from '@/components/Link'
+import { PillButton } from '@/components/gallery/PillButton'
 
 type Article = { title: string; href: string; author: string }
 
@@ -9,14 +10,15 @@ export function ArticleCTA({ article }: { article: Article }) {
   const [collapsed, setCollapsed] = useState(false)
 
   return (
-    <div className="pointer-events-none fixed bottom-4 left-4 z-40 sm:bottom-8 sm:left-8">
+    <div className="pointer-events-none fixed bottom-4 left-4 z-40 sm:bottom-4 sm:left-4">
       <div className="relative">
         {collapsed ? (
-          <button
-            type="button"
+          <PillButton
+            standalone
             onClick={() => setCollapsed(false)}
             aria-label="Show new article"
-            className="pointer-events-auto flex h-11 min-w-[5.5rem] items-center justify-center gap-2 rounded-full border border-[#d4d4d4] bg-white px-3 text-[#666] shadow-[0_10px_30px_rgb(0_0_0/0.12)]"
+            className="flex"
+            contentClassName="pointer-events-auto flex h-8 min-w-[5.5rem] items-center justify-center gap-2 px-3"
           >
             <span className="text-[0.6rem] leading-none tracking-[0.08em] uppercase">
               New Article
@@ -29,7 +31,7 @@ export function ArticleCTA({ article }: { article: Article }) {
                 strokeLinecap="round"
               />
             </svg>
-          </button>
+          </PillButton>
         ) : (
           <div className="pointer-events-auto w-[12.5rem] rounded-xl bg-white p-3 shadow-[0_2px_16px_rgb(0_0_0/0.08)] ring-1 ring-black/5 sm:w-[18rem] sm:rounded-2xl sm:p-4">
             <div className="flex items-center justify-between gap-2 sm:gap-3">
@@ -40,7 +42,7 @@ export function ArticleCTA({ article }: { article: Article }) {
                 type="button"
                 onClick={() => setCollapsed(true)}
                 aria-label="Hide new article"
-                className="pointer-events-auto grid h-6 w-6 shrink-0 place-items-center rounded-full text-[#777] transition-colors hover:bg-black/5 hover:text-[#111] sm:h-7 sm:w-7"
+                className="cursor-pointer pointer-events-auto grid h-6 w-6 shrink-0 place-items-center rounded-full text-[#777] transition-colors hover:bg-black/5 hover:text-[#111] sm:h-7 sm:w-7"
               >
                 <svg viewBox="0 0 10 10" aria-hidden className="h-2 w-2 sm:h-2.5 sm:w-2.5">
                   <path d="M2 5H8" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" />
