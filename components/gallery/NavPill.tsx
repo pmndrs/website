@@ -3,14 +3,17 @@
 import Link from '@/components/Link'
 import SearchButton from '@/components/SearchButton'
 import { Discord, Github, Twitter } from '@/components/social-icons/icons'
-import ThemeSwitch from '@/components/ThemeSwitch'
-import { PillButton } from '@/components/gallery/PillButton'
 import headerNavLinks from '@/data/headerNavLinks'
 import Logo from '@/data/logo.svg'
 import siteMetadata from '@/data/siteMetadata'
-import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react'
+import { Popover, PopoverButton, PopoverPanel } from '@headlessui/react'
 import { useTheme } from 'next-themes'
 import { usePathname } from 'next/navigation'
+import { useRef } from 'react'
+
+// Compact spring curve (~tension:300 friction:20), good for small UI like popovers
+const SPRING =
+  'linear(0.00, 0.0183, 0.0587, 0.116, 0.184, 0.264, 0.349, 0.436, 0.524, 0.610, 0.691, 0.768, 0.837, 0.900, 0.955, 1.00, 1.04, 1.07, 1.10, 1.12, 1.13, 1.14, 1.14, 1.14, 1.14, 1.13, 1.12, 1.11, 1.10, 1.08, 1.07, 1.06, 1.05, 1.04, 1.03, 1.02, 1.01, 1.00, 0.996, 0.991, 0.987, 0.984, 0.982, 0.980, 0.980, 0.980, 0.980, 0.981, 0.982, 0.984, 0.986, 0.987, 0.989, 0.991, 0.992, 0.994, 0.996, 0.997, 0.998, 0.999, 1.00)'
 
 const NAV_LINKS = headerNavLinks.filter((l) => l.href !== '/')
 
@@ -49,106 +52,97 @@ export function NavPill() {
           </Link>
         ))}
 
-        <span
-          className="mx-0.5 hidden h-4 w-px bg-black/10 sm:block dark:bg-white/10"
-          aria-hidden
-        />
-
-        <div className="hidden items-center gap-px sm:flex">
-          <PillButton
-            tooltip="Search"
-            className="grid h-[1.8rem] w-[1.8rem] place-items-center [&_button]:!p-0 [&_svg]:h-[0.95rem] [&_svg]:w-[0.95rem]"
-          >
-            <SearchButton />
-          </PillButton>
-
-          <PillButton
-            tooltip="Theme"
-            className="grid h-[1.8rem] w-[1.8rem] place-items-center [&_button]:!p-0 [&_svg]:h-[0.95rem] [&_svg]:w-[0.95rem]"
-          >
-            <ThemeSwitch />
-          </PillButton>
-
-          {iconLinks.map(({ href, Icon, label }) =>
-            href ? (
-              <PillButton
-                key={label}
-                tooltip={label}
-                href={href}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label={label}
-                className="grid h-[1.8rem] w-[1.8rem] place-items-center"
-              >
-                <Icon className="h-[0.95rem] w-[0.95rem] fill-current" />
-              </PillButton>
-            ) : null
-          )}
-        </div>
-
-        <MobileMoreMenu />
+        <MoreMenu />
       </nav>
     </>
   )
 }
 
-function MobileMoreMenu() {
-  return (
-    <Menu as="div" className="relative sm:hidden">
-      <MenuButton
-        aria-label="More actions"
-        className="grid h-[1.8rem] w-[1.8rem] place-items-center rounded-full text-[#555] transition-colors duration-150 hover:bg-black/6 hover:text-[#111] dark:text-[#aaa] dark:hover:bg-white/8 dark:hover:text-white"
-      >
-        <svg viewBox="0 0 16 16" aria-hidden className="h-[0.95rem] w-[0.95rem] fill-current">
-          <circle cx="3" cy="8" r="1.25" />
-          <circle cx="8" cy="8" r="1.25" />
-          <circle cx="13" cy="8" r="1.25" />
-        </svg>
-      </MenuButton>
+function MoreMenu() {
+  const searchRef = useRef<HTMLDivElement>(null)
 
-      <MenuItems
-        static={false}
-        className="absolute top-full right-0 z-[60] mt-2 min-w-[12rem] rounded-2xl bg-white p-2 shadow-[0_10px_30px_rgb(0_0_0/0.12)] ring-1 ring-black/5 focus:outline-none dark:bg-[#1a1a1a] dark:ring-white/10"
-      >
-        <div className="flex flex-col gap-1">
-          {/* Search — whole row triggers the nested SearchButton */}
-          <button
-            type="button"
-            className="flex h-10 w-full cursor-pointer items-center rounded-xl px-3 text-[#555] hover:bg-black/6 dark:text-[#aaa] dark:hover:bg-white/8"
-            onClick={(e) => {
-              const btn = e.currentTarget.querySelector<HTMLButtonElement>('[aria-label="Search"]')
-              if (btn) btn.click()
+  return (
+    <Popover className="relative">
+      {({ open }) => (
+        <>
+          <div ref={searchRef} className="absolute h-0 w-0 overflow-hidden" aria-hidden="true">
+            <SearchButton />
+          </div>
+
+          <PopoverButton
+            aria-label="More actions"
+            className="grid h-[1.8rem] w-[1.8rem] place-items-center rounded-full text-[#555] transition-colors duration-150 hover:bg-black/6 hover:text-[#111] dark:text-[#aaa] dark:hover:bg-white/8 dark:hover:text-white"
+          >
+            <svg viewBox="0 0 16 16" aria-hidden className="h-[0.95rem] w-[0.95rem] fill-current">
+              <circle cx="3" cy="8" r="1.25" />
+              <circle cx="8" cy="8" r="1.25" />
+              <circle cx="13" cy="8" r="1.25" />
+            </svg>
+          </PopoverButton>
+
+          <PopoverPanel
+            static
+            className="absolute top-full right-0 z-[60] mt-4 min-w-[12rem] origin-top-right rounded-2xl bg-white p-2 shadow-[0_10px_30px_rgb(0_0_0/0.12)] ring-1 ring-black/5 focus:outline-none dark:bg-[#1a1a1a] dark:ring-white/10"
+            style={{
+              opacity: open ? 1 : 0,
+              scale: open ? 1 : 0.92,
+              translate: `0 ${open ? 0 : -4}px`,
+              pointerEvents: open ? 'auto' : 'none',
+              transition: `opacity 499ms ${SPRING}, scale 499ms ${SPRING}, translate 499ms ${SPRING}`,
             }}
           >
-            <span className="text-[0.8rem] font-medium">Search</span>
-            <div className="ml-auto flex h-[0.95rem] w-[0.95rem] items-center justify-center [&_button]:!p-0 [&_svg]:h-[0.95rem] [&_svg]:w-[0.95rem]">
-              <SearchButton />
-            </div>
-          </button>
-
-          {/* Theme — inline buttons to avoid nested Headless UI Menu */}
-          <MobileThemeRow />
-
-          <div className="my-1 h-px bg-black/10 dark:bg-white/10" />
-
-          {iconLinks.map(({ href, Icon, label }) =>
-            href ? (
-              <MenuItem key={label}>
-                <a
-                  href={href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex h-10 items-center rounded-xl px-3 text-[#555] transition-colors hover:bg-black/6 hover:text-[#111] dark:text-[#aaa] dark:hover:bg-white/8 dark:hover:text-white"
+            {({ close }) => (
+              <div className="flex flex-col gap-1">
+                <button
+                  type="button"
+                  className="flex h-10 w-full cursor-pointer items-center rounded-xl px-3 text-[#555] hover:bg-black/6 dark:text-[#aaa] dark:hover:bg-white/8"
+                  onClick={() => {
+                    close()
+                    searchRef.current?.querySelector<HTMLButtonElement>('button')?.click()
+                  }}
                 >
-                  <span className="text-[0.8rem] font-medium">{label}</span>
-                  <Icon className="ml-auto h-[0.95rem] w-[0.95rem] fill-current" />
-                </a>
-              </MenuItem>
-            ) : null
-          )}
-        </div>
-      </MenuItems>
-    </Menu>
+                  <span className="text-[0.8rem] font-medium">Search</span>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth={1.5}
+                    stroke="currentColor"
+                    className="ml-auto h-[0.95rem] w-[0.95rem]"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"
+                    />
+                  </svg>
+                </button>
+
+                <ThemeRow />
+
+                <div className="my-1 h-px bg-black/10 dark:bg-white/10" />
+
+                {iconLinks.map(({ href, Icon, label }) =>
+                  href ? (
+                    <a
+                      key={label}
+                      href={href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={() => close()}
+                      className="flex h-10 items-center rounded-xl px-3 text-[#555] transition-colors hover:bg-black/6 hover:text-[#111] dark:text-[#aaa] dark:hover:bg-white/8 dark:hover:text-white"
+                    >
+                      <span className="text-[0.8rem] font-medium">{label}</span>
+                      <Icon className="ml-auto h-[0.95rem] w-[0.95rem] fill-current" />
+                    </a>
+                  ) : null
+                )}
+              </div>
+            )}
+          </PopoverPanel>
+        </>
+      )}
+    </Popover>
   )
 }
 
@@ -158,7 +152,7 @@ const themeOptions = [
   { value: 'system', label: 'Auto' },
 ] as const
 
-function MobileThemeRow() {
+function ThemeRow() {
   const { theme, setTheme } = useTheme()
   return (
     <div className="flex h-10 items-center rounded-xl px-3 text-[#555] dark:text-[#aaa]">
