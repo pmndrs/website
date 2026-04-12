@@ -41,7 +41,7 @@ export function ArticleCTA({ article }: { article: Article }) {
                 type="button"
                 onClick={() => setCollapsed(true)}
                 aria-label="Hide new article"
-                className="cursor-pointer pointer-events-auto grid h-6 w-6 shrink-0 place-items-center rounded-full text-[#777] transition-colors hover:bg-black/5 hover:text-[#111] sm:h-7 sm:w-7"
+                className="pointer-events-auto grid h-6 w-6 shrink-0 cursor-pointer place-items-center rounded-full text-[#777] transition-colors hover:bg-black/5 hover:text-[#111] sm:h-7 sm:w-7"
               >
                 <svg viewBox="0 0 10 10" aria-hidden className="h-2 w-2 sm:h-2.5 sm:w-2.5">
                   <path d="M2 5H8" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" />
