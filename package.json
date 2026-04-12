@@ -10,7 +10,7 @@
     "analyze": "cross-env ANALYZE=true next build",
     "lint": "next lint --dir pages --dir app --dir components --dir lib --dir layouts --dir scripts",
     "lint:fix": "next lint --fix --dir pages --dir app --dir components --dir lib --dir layouts --dir scripts",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "contentlayer2 build && tsc --noEmit",
     "prepare": "husky"
   },
   "dependencies": {
