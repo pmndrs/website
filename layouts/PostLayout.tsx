@@ -73,7 +73,7 @@ export default function PostLayout({ content, authorDetails, next, prev, childre
                   </dd>
                 </div>
               </dl>
-              <h1 className="max-w-4xl text-pretty text-4xl leading-[1] font-semibold tracking-tight text-gray-950 sm:text-5xl md:text-6xl dark:text-gray-50">
+              <h1 className="max-w-4xl text-4xl leading-[1] font-semibold tracking-tight text-pretty text-gray-950 sm:text-5xl md:text-6xl dark:text-gray-50">
                 {title}
               </h1>
               {byline && (
@@ -211,10 +211,7 @@ export default function PostLayout({ content, authorDetails, next, prev, childre
               </section>
             </footer>
             {siteMetadata.comments && (
-              <div
-                className="pt-10 text-center text-gray-700 dark:text-gray-300"
-                id="comment"
-              >
+              <div className="pt-10 text-center text-gray-700 dark:text-gray-300" id="comment">
                 <Comments slug={slug} />
               </div>
             )}
