@@ -2,7 +2,7 @@ import 'css/tailwind.css'
 import 'pliny/search/algolia.css'
 import 'remark-github-blockquote-alert/alert.css'
 
-import { NavPill } from '@/components/gallery/NavPill'
+import { NavPill } from '@/components/nav-pill'
 import siteMetadata from '@/data/siteMetadata'
 import { Metadata } from 'next'
 import { Inter } from 'next/font/google'
