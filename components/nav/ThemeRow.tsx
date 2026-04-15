@@ -58,7 +58,7 @@ export function ThemeRow() {
             key={value}
             onClick={() => setTheme(value)}
             aria-label={label}
-            className={`grid h-[1.6rem] w-[1.6rem] place-items-center rounded-lg transition-colors ${
+            className={`cursor-pointer grid h-[1.6rem] w-[1.6rem] place-items-center rounded-lg transition-colors ${
               mounted && theme === value
                 ? 'bg-black/8 text-[#111] dark:bg-white/12 dark:text-white'
                 : 'text-[#999] hover:text-[#555] dark:text-[#666] dark:hover:text-[#aaa]'
