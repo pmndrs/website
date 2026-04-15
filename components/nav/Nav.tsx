@@ -9,7 +9,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { DemoActions } from '@/components/demo/DemoActions'
 import { MoreMenu } from './MoreMenu'
 
-const NAV_LINKS = headerNavLinks.filter((l) => l.href !== '/')
+const NAV_LINKS = headerNavLinks.filter((l) => l.href !== '/' && l.href !== '/tags')
 
 const pillSurface =
   'flex items-center gap-px rounded-full bg-white p-1.5 shadow-[0_1px_6px_rgb(0_0_0/0.08)] ring-1 ring-black/5 dark:bg-[#1a1a1a] dark:shadow-[0_1px_6px_rgb(0_0_0/0.3)] dark:ring-white/10'

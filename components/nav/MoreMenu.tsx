@@ -1,5 +1,6 @@
 'use client'
 
+import Link from '@/components/Link'
 import SearchButton from '@/components/SearchButton'
 import { Discord, Github, Twitter } from '@/components/social-icons/icons'
 import siteMetadata from '@/data/siteMetadata'
@@ -52,6 +53,23 @@ export function MoreMenu() {
           >
             {({ close }) => (
               <div className="flex flex-col gap-1">
+                <Link
+                  href="/tags"
+                  onClick={() => close()}
+                  className="flex h-10 items-center rounded-xl px-3 text-[#555] transition-colors hover:bg-black/6 hover:text-[#111] dark:text-[#aaa] dark:hover:bg-white/8 dark:hover:text-white"
+                >
+                  <span className="text-[0.8rem] font-medium">Tags</span>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 16 16"
+                    fill="currentColor"
+                    className="ml-auto h-[0.95rem] w-[0.95rem]"
+                  >
+                    <path d="M6 4.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0m-1 0a.5.5 0 1 0-1 0 .5.5 0 0 0 1 0" />
+                    <path d="M2 1h4.586a1 1 0 0 1 .707.293l7 7a1 1 0 0 1 0 1.414l-4.586 4.586a1 1 0 0 1-1.414 0l-7-7A1 1 0 0 1 1 6.586V2a1 1 0 0 1 1-1m0 5.586 7 7L13.586 9l-7-7H2z" />
+                  </svg>
+                </Link>
+
                 <button
                   type="button"
                   className="flex h-10 w-full cursor-pointer items-center rounded-xl px-3 text-[#555] hover:bg-black/6 dark:text-[#aaa] dark:hover:bg-white/8"
