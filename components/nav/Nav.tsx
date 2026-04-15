@@ -14,6 +14,9 @@ const NAV_LINKS = headerNavLinks.filter((l) => l.href !== '/' && l.href !== '/ta
 const pillSurface =
   'flex items-center gap-px rounded-full bg-white p-1.5 shadow-[0_1px_6px_rgb(0_0_0/0.08)] ring-1 ring-black/5 dark:bg-[#1a1a1a] dark:shadow-[0_1px_6px_rgb(0_0_0/0.3)] dark:ring-white/10'
 
+const SPRING =
+  'linear(0.00, 0.0183, 0.0587, 0.116, 0.184, 0.264, 0.349, 0.436, 0.524, 0.610, 0.691, 0.768, 0.837, 0.900, 0.955, 1.00, 1.04, 1.07, 1.10, 1.12, 1.13, 1.14, 1.14, 1.14, 1.14, 1.13, 1.12, 1.11, 1.10, 1.08, 1.07, 1.06, 1.05, 1.04, 1.03, 1.02, 1.01, 1.00, 0.996, 0.991, 0.987, 0.984, 0.982, 0.980, 0.980, 0.980, 0.980, 0.981, 0.982, 0.984, 0.986, 0.987, 0.989, 0.991, 0.992, 0.994, 0.996, 0.997, 0.998, 0.999, 1.00)'
+
 export function Nav() {
   const isHome = usePathname() === '/'
   const navRef = useRef<HTMLElement | null>(null)
@@ -55,22 +58,26 @@ export function Nav() {
           to   { opacity: 0; transform: translateX(-10px); }
         }
         .home-actions-enter {
-          animation: home-actions-enter 200ms ease-out both;
+          animation: home-actions-enter 499ms ${SPRING} both;
         }
         .home-actions-exit {
-          animation: home-actions-exit 150ms ease-in both;
+          animation: home-actions-exit 499ms ${SPRING} both;
         }
       `}</style>
 
-      {!isHome && (
-        <Link
-          href="/"
-          aria-label={siteMetadata.headerTitle}
-          className="fixed top-3 left-3 z-50 grid h-[2.8rem] w-[2.8rem] place-items-center rounded-full bg-white shadow-[0_1px_6px_rgb(0_0_0/0.08)] ring-1 ring-black/5 transition-colors duration-150 hover:bg-black/3 dark:bg-[#1a1a1a] dark:shadow-[0_1px_6px_rgb(0_0_0/0.3)] dark:ring-white/10 dark:hover:bg-white/5"
-        >
-          <Logo className="h-[1.2rem] w-[1.2rem] dark:invert" />
-        </Link>
-      )}
+      <Link
+        href="/"
+        aria-label={siteMetadata.headerTitle}
+        aria-hidden={isHome}
+        tabIndex={isHome ? -1 : 0}
+        className="fixed top-3 left-3 z-50 grid h-[2.8rem] w-[2.8rem] place-items-center rounded-full bg-white shadow-[0_1px_6px_rgb(0_0_0/0.08)] ring-1 ring-black/5 transition-[opacity,transform,background-color] duration-320 hover:bg-black/3 dark:bg-[#1a1a1a] dark:shadow-[0_1px_6px_rgb(0_0_0/0.3)] dark:ring-white/10 dark:hover:bg-white/5"
+        style={{
+          pointerEvents: isHome ? 'none' : 'auto',
+          transform: isHome ? 'scale(0)' : 'scale(1)',
+        }}
+      >
+        <Logo className="h-[1.2rem] w-[1.2rem] dark:invert" />
+      </Link>
 
       <nav
         ref={navRef}
