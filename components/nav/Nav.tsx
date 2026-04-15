@@ -14,7 +14,7 @@ const NAV_LINKS = headerNavLinks.filter((l) => l.href !== '/')
 const pillSurface =
   'flex items-center gap-px rounded-full bg-white p-1.5 shadow-[0_1px_6px_rgb(0_0_0/0.08)] ring-1 ring-black/5 dark:bg-[#1a1a1a] dark:shadow-[0_1px_6px_rgb(0_0_0/0.3)] dark:ring-white/10'
 
-export function NavPill() {
+export function Nav() {
   const isHome = usePathname() === '/'
   const [mounted, setMounted] = useState(isHome)
   const [exiting, setExiting] = useState(false)
