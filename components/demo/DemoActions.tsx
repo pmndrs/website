@@ -1,7 +1,6 @@
 'use client'
 
 import { demos } from '@/data/demos'
-import { useEffect, useState } from 'react'
 import { useDemoSelection } from './demo-selection-context'
 
 const DEFAULT_DEMO = demos[0]
@@ -61,7 +60,7 @@ function CodesandboxIcon() {
   )
 }
 
-function CommandIcon() {
+function DownloadIcon() {
   return (
     <svg
       viewBox="0 0 24 24"
@@ -73,7 +72,9 @@ function CommandIcon() {
       className="h-[0.95rem] w-[0.95rem]"
       aria-hidden
     >
-      <path d="M9 9a3 3 0 1 1-3-3h12a3 3 0 1 1-3 3v6a3 3 0 1 1 3 3H6a3 3 0 1 1 3-3V9Z" />
+      <path d="M12 3v12" />
+      <path d="m7 10 5 5 5-5" />
+      <path d="M5 21h14" />
     </svg>
   )
 }
@@ -81,14 +82,6 @@ function CommandIcon() {
 export function DemoActions() {
   const { selectedDemo } = useDemoSelection()
   const demo = selectedDemo ?? DEFAULT_DEMO
-  const [copied, setCopied] = useState(false)
-  const command = `npx -y degit pmndrs/examples/demos/${demo.name} ${demo.name} && cd ${demo.name} && npm i && npm run dev`
-
-  useEffect(() => {
-    if (!copied) return
-    const timeoutId = window.setTimeout(() => setCopied(false), 1600)
-    return () => window.clearTimeout(timeoutId)
-  }, [copied])
 
   const linkClassName =
     'group relative grid h-[1.8rem] w-[1.8rem] place-items-center rounded-full text-[#555] transition-colors duration-150 hover:bg-black/6 hover:text-[#111] dark:text-[#aaa] dark:hover:bg-white/8 dark:hover:text-white'
@@ -105,7 +98,7 @@ export function DemoActions() {
         className={linkClassName}
       >
         <OpenInNewIcon />
-        <span className={tooltipClassName}>fullpage</span>
+        <span className={tooltipClassName}>Fullpage</span>
       </a>
       <a
         href={`https://github.com/pmndrs/examples/tree/main/demos/${demo.name}`}
@@ -115,9 +108,9 @@ export function DemoActions() {
         className={linkClassName}
       >
         <GithubIcon />
-        <span className={tooltipClassName}>code</span>
+        <span className={tooltipClassName}>Code</span>
       </a>
-      <a
+      {/* <a
         href={`https://stackblitz.com/github/pmndrs/examples/tree/main/demos/${demo.name}`}
         target="_blank"
         rel="noopener noreferrer"
@@ -125,8 +118,8 @@ export function DemoActions() {
         className={linkClassName}
       >
         <StackblitzIcon />
-        <span className={tooltipClassName}>stackblitz</span>
-      </a>
+        <span className={tooltipClassName}>Stackblitz</span>
+      </a> */}
       <a
         href={`https://codesandbox.io/s/github/pmndrs/examples/tree/main/demos/${demo.name}`}
         target="_blank"
@@ -135,20 +128,17 @@ export function DemoActions() {
         className={linkClassName}
       >
         <CodesandboxIcon />
-        <span className={tooltipClassName}>codesandbox</span>
+        <span className={tooltipClassName}>CodeSandbox</span>
       </a>
-      <button
-        type="button"
-        aria-label="Copy degit command"
+      <a
+        href={`/api/demo-download/${demo.name}`}
+        download={`${demo.name}.zip`}
+        aria-label="Download demo ZIP"
         className={linkClassName}
-        onClick={async () => {
-          await navigator.clipboard.writeText(command)
-          setCopied(true)
-        }}
       >
-        <CommandIcon />
-        <span className={tooltipClassName}>{copied ? 'copied' : 'degit'}</span>
-      </button>
+        <DownloadIcon />
+        <span className={tooltipClassName}>Download ZIP</span>
+      </a>
     </>
   )
 }
