@@ -6,7 +6,7 @@ import Logo from '@/data/logo.svg'
 import siteMetadata from '@/data/siteMetadata'
 import { usePathname } from 'next/navigation'
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
-import { ExampleActions } from './ExampleActions'
+import { DemoActions } from '@/components/demo/DemoActions'
 import { MoreMenu } from './MoreMenu'
 
 const NAV_LINKS = headerNavLinks.filter((l) => l.href !== '/')
@@ -105,7 +105,7 @@ export function Nav() {
             }}
           >
             <div role="toolbar" aria-label="Example actions" className={pillSurface}>
-              <ExampleActions />
+              <DemoActions />
             </div>
           </div>
 
@@ -122,7 +122,7 @@ export function Nav() {
             }}
           >
             <div role="toolbar" aria-label="Example actions" className={pillSurface}>
-              <ExampleActions />
+              <DemoActions />
             </div>
           </div>
         </>
