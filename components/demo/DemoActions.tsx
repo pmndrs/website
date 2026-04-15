@@ -90,6 +90,16 @@ export function DemoActions() {
 
   return (
     <>
+      <span
+        className="max-w-[7rem] truncate px-2 font-mono text-[0.7rem] font-medium tracking-[0.02em] text-[#555] dark:text-[#aaa] sm:max-w-[10rem]"
+        title={demo.name}
+      >
+        {demo.name}
+      </span>
+      <span
+        aria-hidden
+        className="mx-1 h-4 w-px shrink-0 bg-black/8 dark:bg-white/10"
+      />
       <a
         href={demo.embedUrl}
         target="_blank"
