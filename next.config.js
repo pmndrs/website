@@ -124,6 +124,6 @@ module.exports = () => {
           permanent: true,
         },
       ]
-    }
+    },
   })
 }

@@ -2,7 +2,8 @@ import 'css/tailwind.css'
 import 'pliny/search/algolia.css'
 import 'remark-github-blockquote-alert/alert.css'
 
-import { NavPill } from '@/components/gallery/NavPill'
+import { DemoSelectionProvider } from '@/components/demo/demo-selection-context'
+import { Nav } from '@/components/nav'
 import siteMetadata from '@/data/siteMetadata'
 import { Metadata } from 'next'
 import { Inter } from 'next/font/google'
@@ -94,8 +95,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="bg-white pl-[calc(100vw-100%)] text-black antialiased dark:bg-[rgb(13,13,13)] dark:text-white">
         <ThemeProviders>
           <SearchProvider searchConfig={siteMetadata.search as SearchConfig}>
-            <NavPill />
-            {children}
+            <DemoSelectionProvider>
+              <Nav />
+              {children}
+            </DemoSelectionProvider>
           </SearchProvider>
         </ThemeProviders>
       </body>

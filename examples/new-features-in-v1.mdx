@@ -320,23 +320,23 @@ To modify the styles, change the following class selectors in the `prism.css` fi
 }
 
 .code-line {
-  @apply -mx-4 block border-l-4 border-opacity-0 pl-4 pr-4;
+  @apply border-opacity-0 -mx-4 block border-l-4 pr-4 pl-4;
 }
 
 .code-line.inserted {
-  @apply bg-green-500 bg-opacity-20;
+  @apply bg-opacity-20 bg-green-500;
 }
 
 .code-line.deleted {
-  @apply bg-red-500 bg-opacity-20;
+  @apply bg-opacity-20 bg-red-500;
 }
 
 .highlight-line {
-  @apply -mx-4 border-l-4 border-primary-500 bg-gray-700 bg-opacity-50;
+  @apply border-primary-500 bg-opacity-50 -mx-4 border-l-4 bg-gray-700;
 }
 
 .line-number::before {
-  @apply -ml-2 mr-4 inline-block w-4 text-right text-gray-400;
+  @apply mr-4 -ml-2 inline-block w-4 text-right text-gray-400;
   content: attr(line);
 }
 ```
