@@ -1,0 +1,88 @@
+---
+title: 'maintenance'
+date: '2024-08-07'
+authors: ['abernier']
+draft: false
+layout: PostLayout
+---
+
+# drei
+
+## [sb8](https://github.com/pmndrs/drei/pull/1967)
+
+[Storybook 8](https://storybook.js.org/blog/storybook-8/) has nice UI improvements, like a redesign of the mobile menu:
+![](/static/images/post-maintenance-sb8-menu.png)
+
+## [CSF3](https://github.com/pmndrs/drei/pull/1974)
+
+Before
+![image](https://github.com/pmndrs/drei/assets/76580/aa618308-4d2e-4569-a959-7f33235101ee)
+
+After
+![image](https://github.com/pmndrs/drei/assets/76580/d97d8d18-8d4e-46fe-9d52-2e75770e6872)
+
+## [dynamic favicon](https://github.com/pmndrs/drei/pull/1975)
+
+![](https://github.com/pmndrs/drei/assets/76580/d7ee909f-c29d-4f9c-b035-ab2cb77c44e3)
+
+We have made a custom favicon for our SB, that changes its color depending on `process.env.NODE_ENV` so we don't mix things up when coding:
+
+- 🟩 for dev: localhost:6006
+- 🟥 (normal logo) for prod: drei.pnmd.rs
+
+-> idea suggested back to SB team: https://discord.com/channels/486522875931656193/839297503446695956/1246777221700391014
+
+## [Dockerized e2e Playright tests in CI](https://github.com/pmndrs/drei/pull/2037)
+
+e2e tests now rely on a Dockerized Playright image, so the snapshots are reproducible, whatever the machine.
+
+1. 📦 drei tgz package is locally built
+2. `e2e.sh` script tests that a same [`Scene`](https://github.com/pmndrs/drei/blob/master/test/e2e/App.jsx)
+
+   ```tsx
+   function Scene() {
+     useEffect(() => {
+       document.dispatchEvent(new Event('playright:r3f')) // 📸
+     }, [])
+
+     return (
+       <>
+         <Sphere>
+           <meshStandardMaterial roughness={0} metalness={1} />
+         </Sphere>
+         <Environment preset="city" />
+         <CameraControls />
+       </>
+     )
+   }
+   ```
+
+   is rendered exactly the same in different environments:
+   ![](https://github.com/pmndrs/drei/blob/master/test/e2e/snapshot.test.js-snapshots/should-match-previous-one-1-linux.png?raw=true)
+
+   - Next.js
+   - Vite.js
+   - CRA
+
+3. if 2. is ✅, 1. package is published on npm
+
+## [yarn4](https://github.com/pmndrs/drei/pull/2045)
+
+we upgraded to latest yarn version, [as recommended](https://yarnpkg.com/migration/overview)
+
+Thanks to [`corepack`](https://www.totaltypescript.com/how-to-use-corepack) and `packageManager` field, package manager is chosen automatically when `yarn install`.
+
+# blog/website
+
+- forked from [timlrx/tailwind-nextjs-starter-blog](https://github.com/timlrx/tailwind-nextjs-starter-blog) -- [contributions](https://github.com/timlrx/tailwind-nextjs-starter-blog/pulls?q=is%3Apr+author%3Aabernier+is%3Amerged+) to upstream
+- deployed by Github Actions CI with Pages
+- devcontainer
+
+# docs
+
+- next14 upgrade
+- vercel optims
+
+# examples
+
+more to come...
