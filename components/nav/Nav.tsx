@@ -2,8 +2,8 @@
 
 import Link from '@/components/Link'
 import headerNavLinks from '@/data/headerNavLinks'
-import Logo from '@/data/logo.svg'
 import siteMetadata from '@/data/siteMetadata'
+import { InkSplat } from './InkSplat'
 import { usePathname } from 'next/navigation'
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { DemoActions } from '@/components/demo/DemoActions'
@@ -65,19 +65,15 @@ export function Nav() {
         }
       `}</style>
 
-      <Link
-        href="/"
-        aria-label={siteMetadata.headerTitle}
-        aria-hidden={isHome}
-        tabIndex={isHome ? -1 : 0}
-        className="fixed top-3 left-3 z-50 grid h-[2.8rem] w-[2.8rem] place-items-center rounded-full bg-white shadow-[0_1px_6px_rgb(0_0_0/0.08)] ring-1 ring-black/5 transition-[opacity,transform,background-color] duration-320 hover:bg-black/3 dark:bg-[#1a1a1a] dark:shadow-[0_1px_6px_rgb(0_0_0/0.3)] dark:ring-white/10 dark:hover:bg-white/5"
-        style={{
-          pointerEvents: isHome ? 'none' : 'auto',
-          transform: isHome ? 'scale(0)' : 'scale(1)',
-        }}
-      >
-        <Logo className="h-[1.2rem] w-[1.2rem] dark:invert" />
-      </Link>
+      {!isHome && (
+        <Link
+          href="/"
+          aria-label={siteMetadata.headerTitle}
+          className="fixed top-3 left-3 z-50 h-[2.8rem] w-[2.8rem] rounded-full"
+        >
+          <InkSplat />
+        </Link>
+      )}
 
       <nav
         ref={navRef}
