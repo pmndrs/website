@@ -57,6 +57,7 @@ uniform vec2 uMouse;
 uniform vec2 uVel;
 uniform float uStir;
 uniform float uKick;
+uniform float uSmear;
 
 const int N_TENDRILS = 9;
 const int N_SATS = 14;
@@ -183,6 +184,18 @@ void main() {
   vec2 dq = vec2(dp.x * (1.0 + uKick * 1.3) + uKick * 0.12, dp.y * (1.0 - uKick * 0.65));
   float d = length(dq) - r0 * (1.0 + wob);
 
+  // wind (from scrolling): the mass sheds a fluttering streak of ink
+  // downwind, relaxing back once the wind dies
+  float smA = abs(uSmear);
+  if (smA > 0.003) {
+    vec2 smDir = vec2(0.0, sign(uSmear));
+    float tailLen = min(r0 * 0.3 + smA * 0.55, reach(c, smDir, 0.02));
+    vec2 tailEnd = c + smDir * tailLen;
+    tailEnd.x += sin(uTime * 18.0) * smA * 0.03;
+    float dTail = sdTaperedCapsule(p, c, tailEnd, r0 * 0.72, r0 * (0.15 + 0.2 * smA));
+    d = smin(d, dTail, 0.045);
+  }
+
   // tendrils: tapered spikes growing out of the mass, most ending in a bulb
   for (int i = 0; i < N_TENDRILS; i++) {
     float fi = float(i);
@@ -240,9 +253,15 @@ void main() {
     float pop = clamp(springOut(dt, 30.0, 10.0), 0.0, 1.35);
     float rr = (0.003 + 0.021 * h3 * h3 * h3) * pop;
     // drops are shoved by the cursor with real inertia (simulated in JS):
-    // they glide away and settle somewhere new instead of flip-flopping
+    // they glide away and settle somewhere new instead of flip-flopping;
+    // during a scroll smear each drop drags its own little smudge tail
     vec2 pos = c + dir * dist + uSatOff[i];
-    d = smin(d, length(p - pos) - rr, 0.004 + 0.02 * srs * pull);
+    // the tail (and its taper) only exists while the wind blows — at rest
+    // this is an exact circle of radius rr
+    float smT = clamp(abs(uSmear) * 10.0, 0.0, 1.0);
+    vec2 dropTail = vec2(0.0, uSmear * (0.16 + 0.2 * h3) + 1e-4);
+    float dd = sdTaperedCapsule(p, pos, pos + dropTail, rr, rr * mix(1.0, 0.45, smT));
+    d = smin(d, dd, 0.004 + 0.02 * srs * pull);
   }
 
   // nav pill: a chain of ink blobs, one per item, each flying out of the
@@ -384,10 +403,12 @@ export function InkSplat() {
     const uSatH =
       gl.getUniformLocation(program, 'uSatH') ?? gl.getUniformLocation(program, 'uSatH[0]')
     const uKick = gl.getUniformLocation(program, 'uKick')
+    const uSmear = gl.getUniformLocation(program, 'uSmear')
     gl.uniform2f(uMouse, -10, -10)
     gl.uniform2f(uVel, 0, 0)
     gl.uniform1f(uStir, 0)
     gl.uniform1f(uKick, 0)
+    gl.uniform1f(uSmear, 0)
 
     gl.clearColor(0, 0, 0, 0)
 
@@ -443,6 +464,10 @@ export function InkSplat() {
       sats,
       satOff,
       getKick: () => kick,
+      getSmear: () => smear,
+      getFrames: () => frames,
+      getAwake: () => rafActive,
+      getScrollState: () => ({ pendingScroll, lastSeenScrollY, smear, smearV }),
     }
 
     // nav pill state: one spring per item blob, staggered so they trail out
@@ -460,6 +485,12 @@ export function InkSplat() {
     let openState = false
     let kick = 0
     let kickV = 0
+    let smear = 0
+    let smearV = 0
+    // scroll deltas accumulate in the event handler and are consumed by the
+    // render loop — waking must never eat the delta that triggered it
+    let lastSeenScrollY = window.scrollY
+    let pendingScroll = 0
     const measureNav = () => {
       const el = navElRef.current
       if (!el) return
@@ -480,7 +511,9 @@ export function InkSplat() {
     // the blot is static once settled, so the loop sleeps after DURATION and
     // wakes on pointer activity (window.__inkT freezes the clock for debugging)
     let rafActive = true
+    let frames = 0
     const render = () => {
+      frames++
       const now = performance.now()
       const dt = Math.min((now - lastFrame) / 1000, 0.033)
       lastFrame = now
@@ -513,6 +546,15 @@ export function InkSplat() {
         const f = (pointer.stir * 1.2 * Math.exp(-d2 * 60)) / (Math.sqrt(d2) || 1e-4)
         s.vx += (dx * f - s.ox * 20 - s.vx * 7) * dt
         s.vy += (dy * f - s.oy * 20 - s.vy * 7) * dt
+        // wind from scrolling blows drops downwind — lighter drops fly
+        // farther, and the springs carry everything home when it dies
+        s.vy += smear * (5 + 5 * (1 - satH[i * 3 + 2])) * dt
+        // the page edge acts as a ceiling: blown ink pools against it
+        const minOy = 0.025 - s.ry - s.by
+        if (s.oy < minOy) {
+          s.oy = minOy
+          if (s.vy < 0) s.vy = 0
+        }
         s.ox += s.vx * dt
         s.oy += s.vy * dt
 
@@ -579,6 +621,17 @@ export function InkSplat() {
       gl.uniform1f(uKick, kick)
       navEnergy = Math.max(navEnergy, Math.abs(kick) * 0.5, Math.abs(kickV) * 0.02)
 
+      // scroll smear: the accumulated scroll delta lands on the spring as a
+      // dt-independent impulse (a zero-length wake frame can never drop it),
+      // then the overdamped spring relaxes the smudge back without bounce
+      smearV += Math.max(-2.5, Math.min(2.5, (-pendingScroll / UNIT) * 5))
+      pendingScroll = 0
+      smearV += (-smear * 220 - smearV * 32) * dt
+      smear += smearV * dt
+      smear = Math.max(-0.3, Math.min(0.3, smear))
+      gl.uniform1f(uSmear, smear)
+      navEnergy = Math.max(navEnergy, Math.abs(smear) * 0.5, Math.abs(smearV) * 0.02)
+
       const tOverride = (window as { __inkT?: number }).__inkT
       const t = tOverride ?? (now - start) / 1000
       drawFrame(t)
@@ -603,6 +656,13 @@ export function InkSplat() {
         raf = requestAnimationFrame(render)
       }
     }
+    const onScroll = () => {
+      const y = window.scrollY
+      pendingScroll += y - lastSeenScrollY
+      lastSeenScrollY = y
+      wake()
+    }
+    window.addEventListener('scroll', onScroll, { passive: true })
     wakeRef.current = wake
     const onPointerMove = (e: PointerEvent) => {
       const rect = canvas.getBoundingClientRect()
@@ -639,6 +699,7 @@ export function InkSplat() {
       observer.disconnect()
       navObserver?.disconnect()
       window.removeEventListener('pointermove', onPointerMove)
+      window.removeEventListener('scroll', onScroll)
       document.documentElement.removeEventListener('pointerleave', onPointerLeave)
       gl.getExtension('WEBGL_lose_context')?.loseContext()
     }
