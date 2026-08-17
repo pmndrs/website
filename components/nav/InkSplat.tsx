@@ -1,9 +1,40 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import Link from '@/components/Link'
+import headerNavLinks from '@/data/headerNavLinks'
+import siteMetadata from '@/data/siteMetadata'
+import { useEffect, useRef, useState } from 'react'
+import { MoreMenu } from './MoreMenu'
 
-const SIZE = 224 // css px, square
+const WIDTH = 520 // css px
+const HEIGHT = 224 // css px
+const UNIT = 224 // px per shader unit — all shader constants live in this scale
 const DURATION = 2.6 // seconds until the blot is fully settled and still
+
+const NAV_LINKS = headerNavLinks.filter((l) => l.href !== '/' && l.href !== '/tags')
+
+// spring curve (~tension:300 friction:20), shared with the rest of the nav UI
+const SPRING =
+  'linear(0.00, 0.0183, 0.0587, 0.116, 0.184, 0.264, 0.349, 0.436, 0.524, 0.610, 0.691, 0.768, 0.837, 0.900, 0.955, 1.00, 1.04, 1.07, 1.10, 1.12, 1.13, 1.14, 1.14, 1.14, 1.14, 1.13, 1.12, 1.11, 1.10, 1.08, 1.07, 1.06, 1.05, 1.04, 1.03, 1.02, 1.01, 1.00, 0.996, 0.991, 0.987, 0.984, 0.982, 0.980, 0.980, 0.980, 0.980, 0.981, 0.982, 0.984, 0.986, 0.987, 0.989, 0.991, 0.992, 0.994, 0.996, 0.997, 0.998, 0.999, 1.00)'
+
+// items trail out behind the advancing ink front: tight stagger, springy
+// pop-in with follow-through; exits are faster and peel from the right,
+// matching the ink pulling back in
+const trailStyle = (open: boolean, i: number, count: number) => {
+  const inDelay = 40 + i * 45
+  const outDelay = (count - 1 - i) * 20
+  // exits accelerate toward the mass, traveling farther the farther out the
+  // item sits — matching the ink blobs being yanked home
+  const yank = 'cubic-bezier(0.55, 0, 1, 0.45)'
+  return {
+    opacity: open ? 1 : 0,
+    translate: open ? '0 0' : `-${14 + i * 10}px 0`,
+    scale: open ? '1' : '0.7',
+    transition: open
+      ? `opacity 160ms ease-out ${inDelay}ms, translate 420ms ${SPRING} ${inDelay}ms, scale 420ms ${SPRING} ${inDelay}ms`
+      : `opacity 110ms ${yank} ${outDelay}ms, translate 150ms ${yank} ${outDelay}ms, scale 150ms ${yank} ${outDelay}ms`,
+  }
+}
 
 const VERT = /* glsl */ `
 attribute vec2 aPos;
@@ -21,12 +52,20 @@ varying vec2 vUv;
 uniform float uTime;
 uniform float uSeed;
 uniform float uDark;
+uniform vec2 uDims;
 uniform vec2 uMouse;
 uniform vec2 uVel;
 uniform float uStir;
+uniform float uKick;
 
 const int N_TENDRILS = 9;
 const int N_SATS = 14;
+
+// nav pill: one ink blob per item, each with its own JS-driven spring
+const int N_PILL = 6;
+uniform float uPillP[N_PILL];
+uniform float uPillX[N_PILL];
+uniform float uPillW[N_PILL];
 
 // satellite randomness is generated in JS (GPU sin()-hash precision diverges
 // from JS at large arguments) along with per-droplet displacement offsets
@@ -73,11 +112,6 @@ float sdTaperedCapsule(vec2 p, vec2 a, vec2 b, float ra, float rb) {
   return length(pa - ba * h) - mix(ra, rb, h);
 }
 
-// damped spring step response: 0 -> 1 with a physical overshoot and settle
-float springOut(float t, float freq, float damp) {
-  return 1.0 - exp(-damp * t) * cos(freq * t);
-}
-
 // how far ink may travel from c along dir before hitting the top/left canvas edge
 float reach(vec2 c, vec2 dir, float margin) {
   float tx = dir.x < 0.0 ? (c.x - margin) / -dir.x : 1e3;
@@ -100,9 +134,14 @@ float logoSDF(vec2 q) {
   return d;
 }
 
+// damped spring step response: 0 -> 1 with a physical overshoot and settle
+float springOut(float t, float freq, float damp) {
+  return 1.0 - exp(-damp * t) * cos(freq * t);
+}
+
 void main() {
-  // y grows downward to match CSS space
-  vec2 p = vec2(vUv.x, 1.0 - vUv.y);
+  // y grows downward to match CSS space; uDims widens x past 1.0
+  vec2 p = vec2(vUv.x, 1.0 - vUv.y) * uDims;
   vec2 c = vec2(0.154, 0.154);
 
   // pointer disturbance, liquid-style: ink near the cursor is smeared along
@@ -139,7 +178,10 @@ void main() {
   // a slight swell as the mass swallows the returning ink
   float absorb = 1.0 + 0.03 * retP;
   float r0 = 0.1 * impact * bleed * puff * absorb;
-  float d = length(dp) - r0 * (1.0 + wob);
+  // impact squash: returning nav blobs slam in from the right — the mass
+  // compresses along x, bulges in y, and recoils left, ringing briefly
+  vec2 dq = vec2(dp.x * (1.0 + uKick * 1.3) + uKick * 0.12, dp.y * (1.0 - uKick * 0.65));
+  float d = length(dq) - r0 * (1.0 + wob);
 
   // tendrils: tapered spikes growing out of the mass, most ending in a bulb
   for (int i = 0; i < N_TENDRILS; i++) {
@@ -177,12 +219,12 @@ void main() {
       float along = dot(q, dir);
       float perp = dot(q, vec2(-dir.y, dir.x));
       vec2 ql = vec2(along / (1.0 + 0.8 * (1.0 - de)), perp);
-      d = smin(d, length(ql) - bulbR, 0.02);
+      d = smin(d, length(ql) - bulbR, 0.015);
     }
   }
 
   // satellite dots: fastest debris — they land almost instantly with a size
-  // bounce, then get dragged home and gooily absorbed by the mass
+  // bounce; the farthest get pulled home after the beat, near ones barely move
   for (int i = 0; i < N_SATS; i++) {
     float h1 = uSatH[i].x;
     float h2 = uSatH[i].y;
@@ -198,9 +240,24 @@ void main() {
     float pop = clamp(springOut(dt, 30.0, 10.0), 0.0, 1.35);
     float rr = (0.003 + 0.021 * h3 * h3 * h3) * pop;
     // drops are shoved by the cursor with real inertia (simulated in JS):
-    // they glide away and lazily drift home instead of flip-flopping
+    // they glide away and settle somewhere new instead of flip-flopping
     vec2 pos = c + dir * dist + uSatOff[i];
     d = smin(d, length(p - pos) - rr, 0.004 + 0.02 * srs * pull);
+  }
+
+  // nav pill: a chain of ink blobs, one per item, each flying out of the
+  // mass to its slot on its own spring (overshooting slightly) and merging
+  // gooily with its neighbors into a lumpy liquid bar
+  for (int i = 0; i < N_PILL; i++) {
+    float pp = uPillP[i];
+    float ppc = clamp(pp, 0.0, 1.0);
+    if (pp > 0.01 && uPillW[i] > 0.001) {
+      float px = mix(c.x, uPillX[i], pp);
+      float bH = 0.075 * (0.35 + 0.65 * ppc);
+      float hw = uPillW[i] * ppc;
+      float dB = sdBox(vec2(p.x - px, p.y - c.y), vec2(max(hw - bH, 0.0), 0.0)) - bH;
+      d = smin(d, dB, max(0.055 * ppc, 0.004));
+    }
   }
 
   // meniscus: the edge nearest the cursor swells gently toward it and
@@ -214,6 +271,9 @@ void main() {
   // the goo constant scales with strength too — a zero-size bulge must not
   // leave a phantom smin fillet orbiting the rim
   d = smin(d, length(p - mb) - mr, max(0.045 * mstr, 0.004));
+
+  // fine static grain on every edge so the liquid reads as physical ink
+  d += (fbm(p * 12.0 + uSeed * 3.0) - 0.5) * 0.005;
 
   float aa = 0.005;
   float alpha = 1.0 - smoothstep(-aa, aa, d);
@@ -271,6 +331,10 @@ function compile(gl: WebGLRenderingContext, type: number, src: string) {
 
 export function InkSplat() {
   const ref = useRef<HTMLCanvasElement>(null)
+  const navElRef = useRef<HTMLElement>(null)
+  const focusRef = useRef(false)
+  const wakeRef = useRef<() => void>(() => {})
+  const [open, setOpen] = useState(false)
 
   useEffect(() => {
     const canvas = ref.current
@@ -283,8 +347,8 @@ export function InkSplat() {
     if (!gl) return
 
     const dpr = Math.min(window.devicePixelRatio || 1, 2)
-    canvas.width = SIZE * dpr
-    canvas.height = SIZE * dpr
+    canvas.width = WIDTH * dpr
+    canvas.height = HEIGHT * dpr
     gl.viewport(0, 0, canvas.width, canvas.height)
 
     const program = gl.createProgram()!
@@ -303,18 +367,27 @@ export function InkSplat() {
 
     const seed = Math.random() * 100
     gl.uniform1f(gl.getUniformLocation(program, 'uSeed'), seed)
+    gl.uniform2f(gl.getUniformLocation(program, 'uDims'), WIDTH / UNIT, HEIGHT / UNIT)
     const uTime = gl.getUniformLocation(program, 'uTime')
-    const uSatOff =
-      gl.getUniformLocation(program, 'uSatOff') ?? gl.getUniformLocation(program, 'uSatOff[0]')
-    const uSatH =
-      gl.getUniformLocation(program, 'uSatH') ?? gl.getUniformLocation(program, 'uSatH[0]')
     const uDark = gl.getUniformLocation(program, 'uDark')
     const uMouse = gl.getUniformLocation(program, 'uMouse')
     const uVel = gl.getUniformLocation(program, 'uVel')
     const uStir = gl.getUniformLocation(program, 'uStir')
+    const uPillP =
+      gl.getUniformLocation(program, 'uPillP') ?? gl.getUniformLocation(program, 'uPillP[0]')
+    const uPillX =
+      gl.getUniformLocation(program, 'uPillX') ?? gl.getUniformLocation(program, 'uPillX[0]')
+    const uPillW =
+      gl.getUniformLocation(program, 'uPillW') ?? gl.getUniformLocation(program, 'uPillW[0]')
+    const uSatOff =
+      gl.getUniformLocation(program, 'uSatOff') ?? gl.getUniformLocation(program, 'uSatOff[0]')
+    const uSatH =
+      gl.getUniformLocation(program, 'uSatH') ?? gl.getUniformLocation(program, 'uSatH[0]')
+    const uKick = gl.getUniformLocation(program, 'uKick')
     gl.uniform2f(uMouse, -10, -10)
     gl.uniform2f(uVel, 0, 0)
     gl.uniform1f(uStir, 0)
+    gl.uniform1f(uKick, 0)
 
     gl.clearColor(0, 0, 0, 0)
 
@@ -329,6 +402,7 @@ export function InkSplat() {
       gl.uniform1f(uTime, t)
       gl.drawArrays(gl.TRIANGLES, 0, 3)
     }
+
     // the pointer is smoothed through an underdamped spring so quick flicks
     // overshoot and the liquid jiggles; stir ramps up fast near the blot and
     // bleeds off slowly after the cursor leaves
@@ -364,7 +438,44 @@ export function InkSplat() {
     const satOff = new Float32Array(SAT_COUNT * 2)
     let satEnergy = 0
     // dev-only inspection hook (see __inkT above)
-    ;(window as unknown as { __inkDebug?: object }).__inkDebug = { pointer, sats, satOff }
+    ;(window as unknown as { __inkDebug?: object }).__inkDebug = {
+      pointer,
+      sats,
+      satOff,
+      getKick: () => kick,
+    }
+
+    // nav pill state: one spring per item blob, staggered so they trail out
+    // of the mass; opens only on the blob itself (plus focus / touch)
+    const hoverNone = window.matchMedia('(hover: none)').matches
+    const N_PILL = 6
+    const pillX = new Float32Array(N_PILL)
+    const pillW = new Float32Array(N_PILL)
+    const pillP = new Float32Array(N_PILL)
+    const pillV = new Float32Array(N_PILL)
+    const blobTgt = new Float32Array(N_PILL)
+    let navCount = 1
+    let navRight = 1.2
+    let flipAt = 0
+    let openState = false
+    let kick = 0
+    let kickV = 0
+    const measureNav = () => {
+      const el = navElRef.current
+      if (!el) return
+      navRight = (58 + el.offsetWidth + 16) / UNIT
+      navCount = Math.min(el.children.length, N_PILL)
+      for (let i = 0; i < N_PILL; i++) {
+        const kid = el.children[i] as HTMLElement | undefined
+        pillX[i] = kid ? (58 + kid.offsetLeft + kid.offsetWidth / 2) / UNIT : 0
+        pillW[i] = kid ? (kid.offsetWidth / 2 + 9) / UNIT : 0
+      }
+      gl.uniform1fv(uPillX, pillX)
+      gl.uniform1fv(uPillW, pillW)
+    }
+    measureNav()
+    const navObserver = navElRef.current ? new ResizeObserver(() => (measureNav(), wake())) : null
+    if (navElRef.current && navObserver) navObserver.observe(navElRef.current)
 
     // the blot is static once settled, so the loop sleeps after DURATION and
     // wakes on pointer activity (window.__inkT freezes the clock for debugging)
@@ -425,10 +536,59 @@ export function InkSplat() {
       }
       gl.uniform2fv(uSatOff, satOff)
 
+      // nav pill: opens only when hovering the blob itself; once open it
+      // stays while the cursor is anywhere along the pill, so links are
+      // reachable — leaving both closes it
+      const overPill =
+        openState &&
+        pointer.tx > 0.04 &&
+        pointer.tx < navRight &&
+        pointer.ty > 0.02 &&
+        pointer.ty < 0.29
+      const wantOpen =
+        hoverNone || focusRef.current || (!pointer.gone && (distC < 0.13 || overPill))
+      if (wantOpen !== openState) {
+        openState = wantOpen
+        flipAt = now
+        setOpen(wantOpen)
+      }
+      // staggered per-blob springs: each item's ink blob launches (or gets
+      // recalled, rightmost first) on its own delay — a physical trail
+      let navEnergy = 0
+      for (let i = 0; i < N_PILL; i++) {
+        const delay = wantOpen ? i * 45 : (navCount - 1 - i) * 25
+        if (now - flipAt >= delay) blobTgt[i] = wantOpen ? 1 : 0
+        // returning ink is yanked home much harder than it launches
+        const closing = blobTgt[i] === 0 && pillP[i] > 0
+        const k = closing ? 320 : 170
+        const damp = closing ? 11 : 15
+        pillV[i] += ((blobTgt[i] - pillP[i]) * k - pillV[i] * damp) * dt
+        pillP[i] += pillV[i] * dt
+        // hard landing: the blob slams into the mass, momentum becomes a kick
+        if (closing && pillP[i] <= 0.02) {
+          if (pillV[i] < -0.5) kickV += Math.min(-pillV[i], 9) * pillW[i] * 2.2
+          pillP[i] = 0
+          pillV[i] = 0
+        }
+        navEnergy = Math.max(navEnergy, Math.abs(blobTgt[i] - pillP[i]), Math.abs(pillV[i]) * 0.05)
+      }
+      gl.uniform1fv(uPillP, pillP)
+      // impact oscillator: rings the mass after each landing, then dies out
+      kickV += (-kick * 900 - kickV * 18) * dt
+      kick += kickV * dt
+      gl.uniform1f(uKick, kick)
+      navEnergy = Math.max(navEnergy, Math.abs(kick) * 0.5, Math.abs(kickV) * 0.02)
+
       const tOverride = (window as { __inkT?: number }).__inkT
       const t = tOverride ?? (now - start) / 1000
       drawFrame(t)
-      if (t < DURATION || tOverride !== undefined || pointer.stir > 0.002 || satEnergy > 0.0005) {
+      if (
+        t < DURATION ||
+        tOverride !== undefined ||
+        pointer.stir > 0.002 ||
+        satEnergy > 0.0005 ||
+        navEnergy > 0.002
+      ) {
         raf = requestAnimationFrame(render)
       } else {
         rafActive = false
@@ -443,10 +603,11 @@ export function InkSplat() {
         raf = requestAnimationFrame(render)
       }
     }
+    wakeRef.current = wake
     const onPointerMove = (e: PointerEvent) => {
       const rect = canvas.getBoundingClientRect()
-      pointer.tx = (e.clientX - rect.left) / SIZE
-      pointer.ty = (e.clientY - rect.top) / SIZE
+      pointer.tx = (e.clientX - rect.left) / UNIT
+      pointer.ty = (e.clientY - rect.top) / UNIT
       pointer.gone = false
       pointer.lastMove = performance.now()
       // while the disturbance is invisible, teleport the spring to the cursor
@@ -461,6 +622,7 @@ export function InkSplat() {
     }
     const onPointerLeave = () => {
       pointer.gone = true
+      wake()
     }
     window.addEventListener('pointermove', onPointerMove)
     document.documentElement.addEventListener('pointerleave', onPointerLeave)
@@ -468,13 +630,14 @@ export function InkSplat() {
     // repaint the settled frame when the theme toggles
     const observer = new MutationObserver(() => {
       setTheme()
-      drawFrame(Math.min((performance.now() - start) / 1000, DURATION))
+      wake()
     })
     observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] })
 
     return () => {
       cancelAnimationFrame(raf)
       observer.disconnect()
+      navObserver?.disconnect()
       window.removeEventListener('pointermove', onPointerMove)
       document.documentElement.removeEventListener('pointerleave', onPointerLeave)
       gl.getExtension('WEBGL_lose_context')?.loseContext()
@@ -482,11 +645,49 @@ export function InkSplat() {
   }, [])
 
   return (
-    <canvas
-      ref={ref}
-      aria-hidden
-      className="pointer-events-none fixed top-0 left-0 z-50"
-      style={{ width: SIZE, height: SIZE }}
-    />
+    <div className="fixed top-0 left-0 z-50">
+      <canvas
+        ref={ref}
+        aria-hidden
+        className="pointer-events-none block"
+        style={{ width: WIDTH, height: HEIGHT }}
+      />
+      <Link
+        href="/"
+        aria-label={siteMetadata.headerTitle}
+        className="absolute top-3 left-3 h-[2.8rem] w-[2.8rem] rounded-full"
+      />
+      <nav
+        ref={navElRef}
+        aria-label="Site navigation"
+        onFocusCapture={() => {
+          focusRef.current = true
+          wakeRef.current()
+        }}
+        onBlurCapture={() => {
+          focusRef.current = false
+          wakeRef.current()
+        }}
+        className="absolute top-[13px] left-[58px] flex h-[43px] items-center gap-1 pr-2"
+        style={{ pointerEvents: open ? 'auto' : 'none' }}
+      >
+        {NAV_LINKS.map(({ href, title }, i) => (
+          <Link
+            key={href}
+            href={href}
+            className="grid h-[1.8rem] place-items-center rounded-full px-3 text-[0.75rem] font-medium text-white/75 hover:text-white dark:text-black/60 dark:hover:text-black"
+            style={trailStyle(open, i, NAV_LINKS.length + 1)}
+          >
+            {title}
+          </Link>
+        ))}
+        <div
+          className="[&>div>button]:text-white/60 [&>div>button:hover]:text-white dark:[&>div>button]:text-black/60 dark:[&>div>button:hover]:text-black"
+          style={trailStyle(open, NAV_LINKS.length, NAV_LINKS.length + 1)}
+        >
+          <MoreMenu />
+        </div>
+      </nav>
+    </div>
   )
 }

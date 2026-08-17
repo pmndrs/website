@@ -2,7 +2,6 @@
 
 import Link from '@/components/Link'
 import headerNavLinks from '@/data/headerNavLinks'
-import siteMetadata from '@/data/siteMetadata'
 import { InkSplat } from './InkSplat'
 import { usePathname } from 'next/navigation'
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
@@ -44,7 +43,7 @@ export function Nav() {
     observer.observe(nav)
 
     return () => observer.disconnect()
-  }, [])
+  }, [isHome])
 
   return (
     <>
@@ -65,33 +64,27 @@ export function Nav() {
         }
       `}</style>
 
-      {!isHome && (
-        <Link
-          href="/"
-          aria-label={siteMetadata.headerTitle}
-          className="fixed top-3 left-3 z-50 h-[2.8rem] w-[2.8rem] rounded-full"
+      {!isHome && <InkSplat />}
+
+      {isHome && (
+        <nav
+          ref={navRef}
+          className={`fixed top-3 left-[calc(100vw-0.75rem)] z-50 flex -translate-x-full items-center gap-px sm:left-[calc(100vw-1.75rem)] ${pillSurface}`}
+          aria-label="Site navigation"
         >
-          <InkSplat />
-        </Link>
+          {NAV_LINKS.map(({ href, title }) => (
+            <Link
+              key={href}
+              href={href}
+              className="grid h-[1.8rem] place-items-center rounded-full px-3 text-[0.75rem] font-medium text-[#555] transition-colors duration-150 hover:bg-black/6 hover:text-[#111] dark:text-[#aaa] dark:hover:bg-white/8 dark:hover:text-white"
+            >
+              {title}
+            </Link>
+          ))}
+
+          <MoreMenu />
+        </nav>
       )}
-
-      <nav
-        ref={navRef}
-        className={`fixed top-3 left-[calc(100vw-0.75rem)] z-50 flex -translate-x-full items-center gap-px sm:left-[calc(100vw-1.75rem)] ${pillSurface}`}
-        aria-label="Site navigation"
-      >
-        {NAV_LINKS.map(({ href, title }) => (
-          <Link
-            key={href}
-            href={href}
-            className="grid h-[1.8rem] place-items-center rounded-full px-3 text-[0.75rem] font-medium text-[#555] transition-colors duration-150 hover:bg-black/6 hover:text-[#111] dark:text-[#aaa] dark:hover:bg-white/8 dark:hover:text-white"
-          >
-            {title}
-          </Link>
-        ))}
-
-        <MoreMenu />
-      </nav>
 
       {mounted && navWidth > 0 && (
         <>
