@@ -328,12 +328,6 @@ void main() {
 
   vec3 col = mix(ink, mix(vec3(1.0), vec3(0.067), uDark), logoM);
 
-  // faint ripple ring crossing the blot as the logo breaks the surface
-  float rt = max(uTime - 0.5, 0.0);
-  float rippleR = r0 * (0.35 + 2.2 * rt);
-  float ring = exp(-pow((length(dp) - rippleR) * 90.0, 2.0)) * exp(-rt * 5.0) * step(0.001, rt);
-  col = mix(col, mix(vec3(0.35), vec3(0.7), uDark), ring * 0.35 * (1.0 - logoM));
-
   gl_FragColor = vec4(col * alpha, alpha);
 }
 `
